@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KeuanganKu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        /* Login Screen */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .lock-icon {
+            font-size: 60px;
+            color: #00d4ff;
+            margin-bottom: 30px;
+        }
+        
+        .pin-display {
+            background: rgba(255,255,255,0.1);
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 32px;
+            letter-spacing: 15px;
+            margin-bottom: 30px;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .key {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .key:active {
+            transform: scale(0.9);
+            background: #00d4ff;
+        }
+        
+        .key.clear {
+            background: rgba(255,82,82,0.3);
+        }
+        
+        .key.enter {
+            background: rgba(0,212,255,0.3);
+        }
+        
+        /* Main App */
+        #app-screen {
+            display: none;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #00d4ff, #7b2cff);
+            padding: 20px;
+            border-radius: 0 0 30px 30px;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .saldo-box {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .saldo-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .saldo-amount {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-card.pemasukan {
+            border: 2px solid #00ff88;
+        }
+        
+        .stat-card.pengeluaran {
+            border: 2px solid #ff5252;
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card.pemasukan .stat-icon { color: #00ff88; }
+        .stat-card.pengeluaran .stat-icon { color: #ff5252; }
+        
+        .stat-amount {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+        
+        .action-btn {
+            padding: 20px;
+            border-radius: 15px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .action-btn.income {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+        }
+        
+        .action-btn.expense {
+            background: linear-gradient(135deg, #ff5252, #ff1744);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #1a1a2e;
+            width: 100%;
+            border-radius: 30px 30px 0 0;
+            padding: 30px;
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 18px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 10px;
+            border: none;
+            background: #00d4ff;
+            color: #1a1a2e;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal {
+            margin-top: 15px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        /* History */
+        .history-section {
+            padding: 20px;
+        }
+        
+        .history-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .history-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .history-info p {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+        
+        .history-amount {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .history-amount.income { color: #00ff88; }
+        .history-amount.expense { color: #ff5252; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <i class="fas fa-wallet lock-icon"></i>
+        <h2 style="margin-bottom: 30px;">KeuanganKu</h2>
+        <div class="pin-display" id="pin-display">____</div>
+        <div class="keypad">
+            <button class="key" onclick="pressKey('1')">1</button>
+            <button class="key" onclick="pressKey('2')">2</button>
+            <button class="key" onclick="pressKey('3')">3</button>
+            <button class="key" onclick="pressKey('4')">4</button>
+            <button class="key" onclick="pressKey('5')">5</button>
+            <button class="key" onclick="pressKey('6')">6</button>
+            <button class="key" onclick="pressKey('7')">7</button>
+            <button class="key" onclick="pressKey('8')">8</button>
+            <button class="key" onclick="pressKey('9')">9</button>
+            <button class="key clear" onclick="clearPin()">C</button>
+            <button class="key" onclick="pressKey('0')">0</button>
+            <button class="key enter" onclick="checkPin()">✓</button>
+        </div>
+    </div>
+    
+    <!-- Main App Screen -->
+    <div id="app-screen">
+        <div class="header">
+            <h1>💰 KeuanganKu</h1>
+            <div class="saldo-box">
+                <div class="saldo-label">Saldo Saat Ini</div>
+                <div class="saldo-amount" id="display-saldo">Rp 0</div>
+            </div>
+        </div>
+        
+        <div class="stats-row">
+            <div class="stat-card pemasukkan">
+                <i class="fas fa-arrow-down stat-icon"></i>
+                <div>Pemasukan</div>
+                <div class="stat-amount" id="display-pemasukan">Rp 0</div>
+            </div>
+            <div class="stat-card pengeluaran">
+                <i class="fas fa-arrow-up stat-icon"></i>
+                <div>Pengeluaran</div>
+                <div class="stat-amount" id="display-pengeluaran">Rp 0</div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn income" onclick="openModal('income')">
+                <i class="fas fa-plus"></i> Pemasukan
+            </button>
+            <button class="action-btn expense" onclick="openModal('expense')">
+                <i class="fas fa-minus"></i> Pengeluaran
+            </button>
+        </div>
+        
+        <div class="history-section">
+            <h3 class="history-title">📋 Riwayat Transaksi</h3>
+            <div id="history-list">
+                <div class="empty-state">
+                    <p>Belum ada transaksi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Input -->
+    <div class="modal" id="transaction-modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Tambah Pemasukan</h2>
+            <div class="form-group">
+                <label>Jumlah (Rp)</label>
+                <input type="number" id="amount-input" placeholder="0" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label>Keterangan</label>
+                <input type="text" id="desc-input" placeholder="Contoh: Gaji, Belanja">
+            </div>
+            <button class="submit-btn" onclick="submitTransaction()">Simpan</button>
+            <button class="close-modal" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+    
+    <script>
+        // Data
+        let currentPin = '';
+        const correctPin = '1991';
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let totalPemasukan = parseInt(localStorage.getItem('totalPemasukan')) || 0;
+        let totalPengeluaran = parseInt(localStorage.getItem('totalPengeluaran')) || 0;
+        
+        // Format Rupiah
+        function formatRupiah(num) {
+            return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        
+        // Keypad Functions
+        function pressKey(num) {
+            if (currentPin.length < 4) {
+                currentPin += num;
+                updatePinDisplay();
+            }
+        }
+        
+        function clearPin() {
+            currentPin = '';
+            updatePinDisplay();
+        }
+        
+        function updatePinDisplay() {
+            const display = document.getElementById('pin-display');
+            display.textContent = currentPin.padEnd(4, '_');
+        }
+        
+        function checkPin() {
+            if (currentPin === correctPin) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                updateDisplay();
+            } else {
+                alert('PIN salah! Coba lagi.');
+                clearPin();
+            }
+        }
+        
+        // Modal Functions
+        function openModal(type) {
+            const modal = document.getElementById('transaction-modal');
+            const title = document.getElementById('modal-title');
+            modal.dataset.type = type;
+            
+            if (type === 'income') {
+                title.textContent = '💚 Tambah Pemasukan';
+            } else {
+                title.textContent = '❤️ Tambah Pengeluaran';
+            }
+            
+            modal.classList.add('active');
+            document.getElementById('amount-input').value = '';
+            document.getElementById('desc-input').value = '';
+            document.getElementById('amount-input').focus();
+        }
+        
+        function closeModal() {
+            document.getElementById('transaction-modal').classList.remove('active');
+        }
+        
+        function submitTransaction() {
+            const amount = parseInt(document.getElementById('amount-input').value);
+            const desc = document.getElementById('desc-input').value || 'Tanpa Keterangan';
+            const type = document.getElementById('transaction-modal').dataset.type;
+            
+            if (!amount || amount <= 0) {
+                alert('Masukkan jumlah yang valid!');
+                return;
+            }
+            
+            // Add transaction
+            transactions.unshift({
+                type: type,
+                amount: amount,
+                desc: desc,
+                date: new Date().toLocaleDateString('id-ID')
+            });
+            
+            // Update totals
+            if (type === 'income') {
+                totalPemasukan += amount;
+            } else {
+                totalPengeluaran += amount;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            localStorage.setItem('totalPemasukan', totalPemasukan);
+            localStorage.setItem('totalPengeluaran', totalPengeluaran);
+            
+            updateDisplay();
+            closeModal();
+        }
+        
+        function updateDisplay() {
+            const saldo = totalPemasukan - totalPengeluaran;
+            
+            document.getElementById('display-saldo').textContent = formatRupiah(saldo);
+            document.getElementById('display-pemasukan').textContent = formatRupiah(totalPemasukan);
+            document.getElementById('display-pengeluaran').textContent = formatRupiah(totalPengeluaran);
+            
+            // Update history
+            const historyList = document.getElementById('history-list');
+            
+            if (transactions.length === 0) {
+                historyList.innerHTML = '<div class="empty-state"><p>Belum ada transaksi</p></div>';
+            } else {
+                historyList.innerHTML = transactions.map(t => `
+                    <div class="history-item">
+                        <div class="history-info">
+                            <h4>${t.desc}</h4>
+                            <p>${t.date}</p>
+                        </div>
+                        <div class="history-amount ${t.type}">
+                            ${t.type === 'income' ? '+' : '-'}${formatRupiah(t.amount)}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
