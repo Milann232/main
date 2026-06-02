@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Slide Notepad + Image</title>
+    <style>
+        /* ---CSS TEMA GELAP--- */
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #aaaaaa;
+            --accent: #bb86fc;
+            --accent-hover: #9a67ea;
+            --danger: #cf6679;
+            --success: #03dac6;
+            --input-bg: #2d2d2d;
+            --border: #333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ---LAYOUT LOGIN--- */
+        #login-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 300px;
+        }
+
+        .login-box h2 { margin-bottom: 5px; }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        button {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover { background: var(--accent-hover); }
+
+        .btn-small { padding: 6px 12px; font-size: 0.85rem; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #b54b5e; }
+        .btn-secondary { background: #444; color: white; }
+
+        /* ---LAYOUT UTAMA--- */
+        #app-screen {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 15px 20px;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ---GRID SLIDE (CATATAN)--- */
+        #notes-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            align-items: start; /* PENTING: Agar kartu tidak stretch */
+        }
+
+        .note-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            border: 1px solid var(--border);
+            position: relative; /* PENTING untuk positioning tombol */
+        }
+
+        .note-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+
+        .note-header {
+            margin-bottom: 10px;
+        }
+
+        .note-title { font-size: 1.1rem; font-weight: bold; color: var(--accent); }
+        .note-date { font-size: 0.75rem; color: #666; margin-bottom: 5px; }
+        
+        .note-content { 
+            white-space: pre-wrap; 
+            color: var(--text-secondary); 
+            font-size: 0.9rem; 
+            margin-bottom: 10px;
+            overflow-y: auto; /* Scroll jika konten terlalu banyak */
+            flex-grow: 1;
+            max-height: 150px;
+        }
+        
+        .note-image {
+            width: 100%;
+            max-height: 120px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+
+        /* ---PERBAIKAN TOMBOL HAPUS--- */
+        .note-actions {
+            margin-top: auto; /* PENTING: Selalu di bawah */
+            padding-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid var(--border);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #555;
+            margin-top: 50px;
+        }
+
+        /* ---MODAL TAMBAH/SUNTING CATATAN--- */
+        #modal-add {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        .file-upload-wrapper {
+            border: 2px dashed var(--border);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .file-upload-wrapper:hover { border-color: var(--accent); }
+
+        .preview-image {
+            width: 100%;
+            max-height: 150px;
+            object-fit: contain;
+            border-radius: 5px;
+            display: none;
+            margin-top: 5px;
+            background: #000;
+        }
+
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+
+        .note-title-input,
+        .note-content-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- LAYAR LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>🔒 Slide Notes</h2>
+            <p style="font-size: 12px; color: #777; margin-bottom: 10px;">Masukkan PIN: 6666</p>
+            <input type="password" id="pin-input" placeholder="****" maxlength="4">
+            <button onclick="checkLogin()">Buka</button>
+            <p id="login-error" style="color: var(--danger); font-size: 12px; margin-top: 5px; display: none;">PIN Salah!</p>
+        </div>
+    </div>
+
+    <!-- APLIKASI UTAMA -->
+    <div id="app-screen">
+        <header>
+            <h3>📝 Slide Notes</h3>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="openModal()">+ Catatan Baru</button>
+                <button onclick="logout()" class="btn-secondary" style="background: #333;">Logout</button>
+            </div>
+        </header>
+
+        <div id="notes-container">
+            <!-- Catatan akan muncul di sini -->
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH CATATAN -->
+    <div id="modal-add">
+        <div class="modal-content">
+            <h3 id="modal-title">Tambah Catatan</h3>
+            
+            <input type="text" id="note-title-input" class="note-title-input" placeholder="Judul Catatan">
+            
+            <textarea id="note-content-input" class="note-content-input" placeholder="Isi catatan..."></textarea>
+            
+            <!-- Upload Gambar -->
+            <label style="font-size: 0.9rem; color: var(--text-secondary);">Upload Foto/Gambar:</label>
+            <div class="file-upload-wrapper" onclick="document.getElementById('image-input').click()">
+                <span style="color: #777;">📷 Klik untuk upload gambar</span>
+                <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="previewImage(this)">
+            </div>
+            <img id="image-preview" class="preview-image" alt="Preview">
+            <button type="button" id="remove-image-btn" class="btn-danger btn-small" style="display: none;" onclick="removeImage()">Hapus Gambar</button>
+            
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="btn-secondary">Batal</button>
+                <button onclick="saveNote()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---KONFIGURASI---
+        const STORAGE_KEY = 'dark_slide_notes_v2';
+        const PIN_CODE = '6666';
+
+        let notes = [];
+        let currentImageBase64 = null;
+        let isEditing = false;
+        let editId = null;
+
+        // ---FUNGSI UTAMA---
+
+        // 1. Login
+        function checkLogin() {
+            const inputPin = document.getElementById('pin-input').value;
+            const errorMsg = document.getElementById('login-error');
+            
+            if (inputPin === PIN_CODE) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'flex';
+                loadNotes();
+            } else {
+                errorMsg.style.display = 'block';
+                shakeElement(document.querySelector('.login-box'));
+            }
+        }
+
+        function shakeElement(el) {
+            let pos = 5;
+            let interval = setInterval(() => {
+                if (pos === -5) clearInterval(interval);
+                el.style.transform = `translateX(${pos}px)`;
+                pos = pos === 5 ? -5 : 5;
+            }, 30);
+            setTimeout(() => el.style.transform = 'translateX(0)', 200);
+        }
+
+        // 2. Load Data
+        function loadNotes() {
+            const storedNotes = localStorage.getItem(STORAGE_KEY);
+            if (storedNotes) {
+                try {
+                    notes = JSON.parse(storedNotes);
+                } catch(e) {
+                    notes = [];
+                }
+            } else {
+                notes = [];
+            }
+            renderNotes();
+        }
+
+        // 3. Simpan ke LocalStorage
+        function saveToLocal() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+            } catch(e) {
+                alert("Gambar terlalu besar! Silakan gunakan gambar lebih kecil.");
+            }
+        }
+
+        // 4. Tampilkan Catatan
+        function renderNotes() {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = '';
+
+            if (notes.length === 0) {
+                container.innerHTML = '<div class="empty-state">Belum ada catatan.<br>Klik "+ Catatan Baru" untuk membuat.</div>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = 'note-card';
+                
+                let imageHtml = note.image ? `<img src="${note.image}" class="note-image" alt="Gambar">` : '';
+                
+                card.innerHTML = `
+                    <div class="note-header">
+                        <div class="note-date">${note.date || ''}</div>
+                        <div class="note-title">${note.title}</div>
+                    </div>
+                    ${imageHtml}
+                    <div class="note-content">${note.content}</div>
+                    <div class="note-actions">
+                        <button class="btn-danger btn-small" onclick="deleteNote(${note.id})">Hapus</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 5. Preview Gambar Sebelum Upload
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Cek ukuran file (maksimal 1MB)
+                if (file.size > 1024 * 1024) {
+                    alert("Ukuran gambar maksimal 1MB!");
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageBase64 = e.target.result;
+                    const preview = document.getElementById('image-preview');
+                    preview.src = currentImageBase64;
+                    preview.style.display = 'block';
+                    document.getElementById('remove-image-btn').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 6. Hapus Gambar Preview
+        function removeImage() {
+            currentImageBase64 = null;
+            document.getElementById('image-input').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('image-preview').src = '';
+            document.getElementById('remove-image-btn').style.display = 'none';
+        }
+
+        // 7. Simpan Catatan
+        function saveNote() {
+            const titleInput = document.getElementById('note-title-input');
+            const contentInput = document.getElementById('note-content-input');
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+
+            if (!title && !content && !currentImageBase64) {
+                alert("Isi minimal judul, isi, atau upload gambar!");
+                return;
+            }
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            if (isEditing) {
+                const index = notes.findIndex(n => n.id === editId);
+                if (index !== -1) {
+                    notes[index].title = title;
+                    notes[index].content = content;
+                    notes[index].image = currentImageBase64 || notes[index].image;
+                }
+            } else {
+                const newNote = {
+                    id: Date.now(),
+                    title: title,
+                    content: content,
+                    image: currentImageBase64,
+                    date: dateStr
+                };
+                notes.push(newNote);
+            }
+
+            saveToLocal();
+            renderNotes();
+            closeModal();
+        }
+
+        // 8. Hapus Catatan
+        function deleteNote(id) {
+            if(confirm('Yakin ingin menghapus catatan ini?')) {
+                notes = notes.filter(note => note.id !== id);
+                saveToLocal();
+                renderNotes();
+            }
+        }
+
+        // 9. Modal Control
+        function openModal() {
+            document.getElementById('modal-add').style.display = 'flex';
+            document.getElementById('note-title-input').value = '';
+            document.getElementById('note-content-input').value = '';
+            document.getElementById('modal-title').innerText = "Catatan Baru";
+            removeImage();
+            isEditing = false;
+            editId = null;
+        }
+
+        function closeModal() {
+            document.getElementById('modal-add').style.display = 'none';
+        }
+
+        // 10. Logout
+        function logout() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-screen').style.display = 'none';
+            document.getElementById('pin-input').value = '';
+            document.getElementById('login-error').style.display = 'none';
+        }
+
+        // Enter key for PIN
+        document.getElementById('pin-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkLogin();
+        });
+
+    </script>
+</body>
+</html>
