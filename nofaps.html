@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Apex | Premium Streak Tracker</title>
+    
+    <!-- External Libraries -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-glow: 0 0 15px rgba(0, 243, 255, 0.4), 0 0 30px rgba(0, 243, 255, 0.2);
+            --bg-dark: #050505;
+            --bg-card: #111111;
+            --bg-glass: rgba(20, 20, 20, 0.65);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --success: #00ff9d;
+            --danger: #ff3366;
+            --warning: #ffaa00;
+            --font-main: 'Outfit', sans-serif;
+            --radius: 16px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.03) 0%, transparent 40%),                radial-gradient(circle at 90% 80%, rgba(0, 102, 255, 0.03) 0%, transparent 40%);
+        }
+
+        /* Glassmorphism Utility */
+        .glass {
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-hover:hover {
+            border-color: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 243, 255, 0.1);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        /* Layout */
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, var(--neon-blue-dim), transparent);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .xp-bar-container {
+            width: 120px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: var(--neon-blue);
+            box-shadow: var(--neon-glow);
+            transition: width 0.5s ease;
+        }
+
+        /* Dashboard Streak Counter */
+        .streak-hero {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .streak-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--neon-blue-dim) 0%, transparent 70%);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .streak-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+        .streak-counter {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(to bottom, #ffffff, #888888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .streak-sub {
+            font-size: 1.2rem;
+            color: var(--neon-blue);
+            font-weight: 500;
+            text-shadow: var(--neon-glow);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--radius-sm);            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: var(--neon-glow);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.6);
+        }
+
+        .btn-primary:disabled {
+            background: rgba(0, 255, 157, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: rgba(255, 51, 102, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 51, 102, 0.25);
+        }
+
+        .btn-emergency {
+            background: linear-gradient(135deg, #ff3366, #ff0055);
+            color: white;
+            margin-top: 16px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.4); }            50% { box-shadow: 0 0 0 10px rgba(255, 51, 102, 0); }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-glass);
+            color: var(--text-secondary);
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: var(--neon-blue-dim);
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            padding: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.03);
+            position: relative;
+        }
+
+        .calendar-day.clean {
+            background: rgba(0, 243, 255, 0.15);
+            color: var(--neon-blue);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+        }
+
+        .calendar-day.relapse {
+            background: rgba(255, 51, 102, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .calendar-day.today {
+            box-shadow: 0 0 0 2px var(--neon-blue);
+        }
+
+        /* Journal & Goals */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .input-field, .textarea-field {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus, .textarea-field:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 3px var(--neon-blue-dim);
+        }
+
+        .mood-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .mood-btn {
+            font-size: 1.5rem;
+            background: none;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.5;
+        }
+
+        .mood-btn.selected {
+            opacity: 1;
+            border-color: var(--neon-blue);
+            transform: scale(1.1);
+        }
+
+        .journal-entry {
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--neon-blue);
+        }
+
+        .journal-date {            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        /* Achievements */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .achievement {
+            text-align: center;
+            padding: 16px 8px;
+            opacity: 0.4;
+            transition: all 0.3s;
+        }
+
+        .achievement.unlocked {
+            opacity: 1;
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-blue);
+        }
+
+        .achievement-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--neon-blue);
+        }
+
+        .achievement-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 400px;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .modal-text {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;            align-items: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.7rem;
+            transition: all 0.3s;
+            padding: 8px 16px;
+            border-radius: 12px;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+        }
+
+        .nav-item.active {
+            color: var(--neon-blue);
+            background: var(--neon-blue-dim);
+        }
+
+        /* Breathing Animation */
+        .breathing-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--neon-blue) 0%, transparent 70%);
+            margin: 0 auto 24px;
+            animation: breathe 4s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.3); opacity: 0.8; }
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: rgba(0, 255, 157, 0.15);            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            animation: slideDown 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            box-shadow: 0 4px 20px rgba(0, 255, 157, 0.2);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 800px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .hidden { display: none !important; }
+        
+        .quote-box {
+            font-style: italic;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 20px;
+            border-left: 2px solid var(--neon-blue);
+            margin: 20px 0;
+            background: rgba(0, 243, 255, 0.05);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 20px 0;
+        }    </style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="app-container">
+    <!-- Header -->
+    <header class="header glass">
+        <div class="user-profile">
+            <div>
+                <div class="level-badge" id="levelBadge">Beginner</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
+                    <span id="xpDisplay">0</span> XP
+                </div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar-fill" id="xpBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn" style="width: auto; padding: 10px; background: rgba(255,255,255,0.1);" onclick="App.toggleSettings()">
+            <i class="fas fa-cog"></i>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Dashboard Tab -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="streak-hero glass">
+                <div class="streak-label">Current Streak</div>
+                <div class="streak-counter" id="streakDays">0</div>
+                <div class="streak-sub" id="streakTime">00:00:00</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card glass glass-hover">
+                    <div class="stat-value" id="longestStreak">0</div>
+                    <div class="stat-label">Best Streak</div>
+                </div>
+                <div class="stat-card glass glass-hover">
+                    <div class="stat-value" id="totalCleanDays">0</div>
+                    <div class="stat-label">Clean Days</div>
+                </div>
+                <div class="stat-card glass glass-hover">
+                    <div class="stat-value" id="successRate">0%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+                <div class="stat-card glass glass-hover">
+                    <div class="stat-value" id="totalAttempts">0</div>                    <div class="stat-label">Total Attempts</div>
+                </div>
+            </div>
+
+            <div class="quote-box glass" id="dailyQuote">
+                "The secret of getting ahead is getting started."
+            </div>
+
+            <button class="btn btn-primary" id="checkInBtn" onclick="App.checkIn()">
+                <i class="fas fa-check-circle"></i> Daily Check-In (+50 XP)
+            </button>
+            
+            <button class="btn btn-emergency" onclick="App.showEmergency()">
+                <i class="fas fa-life-ring"></i> Emergency Motivation
+            </button>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div id="tab-calendar" class="tab-content">
+            <div class="glass" style="padding: 20px;">
+                <h3 style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span id="calendarMonth">Month</span>
+                    <div style="display: flex; gap: 16px; font-size: 0.8rem;">
+                        <span style="color: var(--neon-blue);">● Clean</span>
+                        <span style="color: var(--danger);">● Relapse</span>
+                    </div>
+                </h3>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Journal Tab -->
+        <div id="tab-journal" class="tab-content">
+            <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 16px;">Daily Reflection</h3>
+                <div class="mood-selector">
+                    <button class="mood-btn" onclick="App.selectMood(1)">😔</button>
+                    <button class="mood-btn" onclick="App.selectMood(2)">😕</button>
+                    <button class="mood-btn" onclick="App.selectMood(3)">😐</button>
+                    <button class="mood-btn" onclick="App.selectMood(4)">🙂</button>
+                    <button class="mood-btn" onclick="App.selectMood(5)">😄</button>
+                </div>
+                <div class="input-group">
+                    <textarea class="textarea-field" id="journalNote" rows="3" placeholder="How are you feeling today? What triggered you? What went well?"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="App.saveJournal()">Save Entry</button>
+            </div>
+            <h3 style="margin-bottom: 12px; color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Recent Entries</h3>
+            <div id="journalList"></div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="tab-stats" class="tab-content">
+            <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 16px;">Progress Analytics</h3>
+                <div class="chart-container">
+                    <canvas id="streakChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 16px;">Mood History</h3>
+                <div class="chart-container">
+                    <canvas id="moodChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass" style="padding: 20px;">
+                <h3 style="margin-bottom: 16px;">Achievements</h3>
+                <div class="achievement-grid" id="achievementGrid">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="tab-settings" class="tab-content">
+            <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 16px;">Data Management</h3>
+                <button class="btn btn-primary" style="margin-bottom: 12px;" onclick="App.exportData()">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+                <label class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-bottom: 12px; cursor: pointer;">
+                    <i class="fas fa-upload"></i> Import Data
+                    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="App.importData(this)">
+                </label>
+            </div>
+
+            <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 16px;">Notifications</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <span>Daily Reminders</span>
+                    <button class="btn" style="width: auto; padding: 8px 16px; background: rgba(255,255,255,0.1);" onclick="App.toggleNotifications()">
+                        <span id="notifStatus">Enable</span>
+                    </button>
+                </div>
+            </div>
+            <div class="glass" style="padding: 20px; border-color: rgba(255, 51, 102, 0.3);">
+                <h3 style="margin-bottom: 16px; color: var(--danger);">Danger Zone</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">
+                    Resetting will log a relapse and restart your current streak. Your total clean days and history will be preserved.
+                </p>
+                <button class="btn btn-danger" onclick="App.confirmReset()">
+                    <i class="fas fa-redo"></i> Reset Streak
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <a href="#" class="nav-item active" onclick="App.switchTab('dashboard', this)">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="#" class="nav-item" onclick="App.switchTab('calendar', this)">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Calendar</span>
+    </a>
+    <a href="#" class="nav-item" onclick="App.switchTab('journal', this)">
+        <i class="fas fa-book"></i>
+        <span>Journal</span>
+    </a>
+    <a href="#" class="nav-item" onclick="App.switchTab('stats', this)">
+        <i class="fas fa-chart-line"></i>
+        <span>Stats</span>
+    </a>
+    <a href="#" class="nav-item" onclick="App.switchTab('settings', this)">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+    </a>
+</nav>
+
+<!-- Modals -->
+<div class="modal-overlay" id="resetModal">
+    <div class="modal-content glass">
+        <h3 class="modal-title">Confirm Reset</h3>
+        <p class="modal-text">Are you sure you want to reset your streak? This will be logged as a relapse. Remember, progress is not linear. Every restart is a new opportunity.</p>
+        <div class="modal-actions">
+            <button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="App.closeModal('resetModal')">Cancel</button>
+            <button class="btn btn-danger" onclick="App.executeReset()">Confirm Reset</button>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="emergencyModal">
+    <div class="modal-content glass">
+        <div class="breathing-circle"></div>
+        <h3 class="modal-title">Breathe</h3>
+        <p class="modal-text" id="emergencyQuote">"You don't have to be perfect. You just have to keep trying. This urge will pass."</p>
+        <button class="btn btn-primary" onclick="App.closeModal('emergencyModal')">I'm Stronger Than This</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="milestoneModal">
+    <div class="modal-content glass">
+        <h3 class="modal-title" style="color: var(--neon-blue);">🎉 Milestone Reached!</h3>
+        <p class="modal-text" id="milestoneText">You've reached a new milestone!</p>
+        <button class="btn btn-primary" onclick="App.closeModal('milestoneModal')">Continue</button>
+    </div>
+</div>
+
+<script>
+const App = {
+    state: {
+        startDate: new Date().toISOString(),
+        currentStreakStart: new Date().toISOString(),
+        relapses: [],
+        totalCleanDays: 0,
+        longestStreak: 0,
+        xp: 0,
+        level: 'Beginner',
+        journal: [],
+        achievements: [],
+        lastCheckIn: null, // Tracks the date of the last check-in
+        settings: {
+            notifications: false,
+            reminderTime: '09:00'
+        },
+        accountCreated: new Date().toISOString()
+    },
+
+    quotes: [
+        "The secret of getting ahead is getting started.",
+        "Discipline is choosing between what you want now and what you want most.",
+        "You are not your urges. You are the one who observes them.",
+        "Every day is a new beginning. Take a deep breath and start again.",
+        "Strength does not come from winning. Your struggles develop your strengths.",
+        "The only bad workout is the one that didn't happen. The only bad day is the one you gave up.",
+        "Your future is created by what you do today, not tomorrow."
+    ],
+
+    milestones: [1, 3, 7, 14, 30, 60, 90, 180, 365],
+    
+    levels: [        { name: 'Beginner', min: 0 },
+        { name: 'Focused', min: 500 },
+        { name: 'Disciplined', min: 1500 },
+        { name: 'Determined', min: 3000 },
+        { name: 'Elite', min: 6000 },
+        { name: 'Master', min: 10000 }
+    ],
+
+    achievementsList: [
+        { id: 'first_day', name: 'First Day', icon: 'fa-seedling', condition: (s) => s.totalCleanDays >= 1 },
+        { id: 'first_week', name: 'First Week', icon: 'fa-leaf', condition: (s) => s.longestStreak >= 7 },
+        { id: 'first_month', name: 'First Month', icon: 'fa-tree', condition: (s) => s.longestStreak >= 30 },
+        { id: 'consistency', name: 'Consistency King', icon: 'fa-crown', condition: (s) => s.relapses.length > 0 && (s.totalCleanDays / (s.totalCleanDays + s.relapses.length)) > 0.8 },
+        { id: 'comeback', name: 'Comeback Champion', icon: 'fa-phoenix', condition: (s) => s.relapses.length >= 2 && s.longestStreak >= 14 },
+        { id: 'year_warrior', name: 'Year Warrior', icon: 'fa-trophy', condition: (s) => s.longestStreak >= 365 }
+    ],
+
+    currentMood: 3,
+    charts: {},
+
+    init() {
+        this.loadState();
+        this.setupEventListeners();
+        this.renderAll();
+        this.startTimer();
+        this.checkAchievements();
+        this.requestNotificationPermission();
+        
+        // Random quote
+        document.getElementById('dailyQuote').textContent = `"${this.quotes[Math.floor(Math.random() * this.quotes.length)]}"`;
+    },
+
+    loadState() {
+        const saved = localStorage.getItem('apex_streak_state');
+        if (saved) {
+            this.state = { ...this.state, ...JSON.parse(saved) };
+        }
+    },
+
+    saveState() {
+        localStorage.setItem('apex_streak_state', JSON.stringify(this.state));
+    },
+
+    startTimer() {
+        setInterval(() => this.updateTimer(), 1000);
+        this.updateTimer();
+    },
+
+    updateTimer() {
+        const start = new Date(this.state.currentStreakStart);        const now = new Date();
+        const diff = now - start;
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('streakDays').textContent = days;
+        document.getElementById('streakTime').textContent = 
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        // Check milestones
+        this.milestones.forEach(m => {
+            if (days === m && !this.state.achievements.includes(`milestone_${m}`)) {
+                this.unlockAchievement(`milestone_${m}`, `Milestone: ${m} Days`);
+                this.addXP(200);
+                this.showMilestone(m);
+            }
+        });
+
+        // Update total clean days if it's a new day
+        const lastCleanDay = this.state.lastCleanDayUpdate ? new Date(this.state.lastCleanDayUpdate).getDate() : null;
+        if (lastCleanDay !== now.getDate() && days > 0) {
+            this.state.totalCleanDays += 1;
+            this.state.lastCleanDayUpdate = now.toISOString();
+            this.addXP(100);
+            this.saveState();
+            this.renderStats();
+        }
+    },
+
+    addXP(amount) {
+        this.state.xp += amount;
+        this.updateLevel();
+        this.saveState();
+        this.renderHeader();
+    },
+
+    updateLevel() {
+        let newLevel = 'Beginner';
+        for (let i = this.levels.length - 1; i >= 0; i--) {
+            if (this.state.xp >= this.levels[i].min) {
+                newLevel = this.levels[i].name;
+                break;
+            }
+        }
+        if (newLevel !== this.state.level) {
+            this.state.level = newLevel;
+            this.saveState();        }
+    },
+
+    renderHeader() {
+        document.getElementById('levelBadge').textContent = this.state.level;
+        document.getElementById('xpDisplay').textContent = this.state.xp;
+        
+        const currentLevel = this.levels.find(l => l.name === this.state.level);
+        const nextLevel = this.levels[this.levels.indexOf(currentLevel) + 1];
+        
+        if (nextLevel) {
+            const progress = ((this.state.xp - currentLevel.min) / (nextLevel.min - currentLevel.min)) * 100;
+            document.getElementById('xpBar').style.width = `${Math.min(progress, 100)}%`;
+        } else {
+            document.getElementById('xpBar').style.width = '100%';
+        }
+    },
+
+    renderStats() {
+        document.getElementById('longestStreak').textContent = this.state.longestStreak;
+        document.getElementById('totalCleanDays').textContent = this.state.totalCleanDays;
+        document.getElementById('totalAttempts').textContent = this.state.relapses.length + 1;
+        
+        const totalDays = Math.max(1, Math.floor((new Date() - new Date(this.state.accountCreated)) / (1000 * 60 * 60 * 24)));
+        const rate = Math.min(100, Math.round((this.state.totalCleanDays / totalDays) * 100));
+        document.getElementById('successRate').textContent = `${rate}%`;
+    },
+
+    updateCheckInUI() {
+        const btn = document.getElementById('checkInBtn');
+        const today = new Date().toDateString();
+        
+        if (this.state.lastCheckIn === today) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Checked In Today';
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Daily Check-In (+50 XP)';
+        }
+    },
+
+    checkIn() {
+        const today = new Date().toDateString();
+        
+        // Prevent multiple check-ins per day
+        if (this.state.lastCheckIn === today) {
+            this.showToast("You've already checked in today!", "warning");
+            return;
+        }
+                this.state.lastCheckIn = today;
+        this.addXP(50);
+        this.saveState();
+        this.updateCheckInUI();
+        this.showToast("Checked in successfully! +50 XP", "success");
+        
+        // Small confetti burst for positive reinforcement
+        confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: ['#00ff9d', '#00f3ff']
+        });
+    },
+
+    showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        const color = type === 'success' ? 'var(--success)' : 'var(--warning)';
+        
+        toast.style.borderColor = color;
+        toast.style.color = color;
+        toast.style.background = type === 'success' ? 'rgba(0, 255, 157, 0.15)' : 'rgba(255, 170, 0, 0.15)';
+        
+        toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    },
+
+    renderCalendar() {
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        
+        const date = new Date();
+        const month = date.getMonth();
+        const year = date.getFullYear();
+        
+        document.getElementById('calendarMonth').textContent = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        days.forEach(day => {
+            const div = document.createElement('div');
+            div.className = 'calendar-day-header';
+            div.textContent = day;            grid.appendChild(div);
+        });
+        
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        for (let i = 0; i < firstDay; i++) {
+            grid.appendChild(document.createElement('div'));
+        }
+        
+        const relapseDates = this.state.relapses.map(r => new Date(r).toDateString());
+        const today = new Date().toDateString();
+        
+        for (let i = 1; i <= daysInMonth; i++) {
+            const cellDate = new Date(year, month, i);
+            const dateStr = cellDate.toDateString();
+            const div = document.createElement('div');
+            div.className = 'calendar-day';
+            div.textContent = i;
+            
+            if (dateStr === today) div.classList.add('today');
+            if (relapseDates.includes(dateStr)) {
+                div.classList.add('relapse');
+            } else if (cellDate >= new Date(this.state.currentStreakStart) && cellDate <= new Date()) {
+                div.classList.add('clean');
+            }
+            
+            grid.appendChild(div);
+        }
+    },
+
+    renderJournal() {
+        const list = document.getElementById('journalList');
+        list.innerHTML = '';
+        
+        const sorted = [...this.state.journal].sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        sorted.slice(0, 10).forEach(entry => {
+            const div = document.createElement('div');
+            div.className = 'journal-entry glass';
+            const moods = ['', '😔', '😕', '😐', '🙂', '😄'];
+            div.innerHTML = `
+                <div class="journal-date">${new Date(entry.date).toLocaleDateString()} ${moods[entry.mood]}</div>
+                <div style="color: var(--text-primary); font-size: 0.9rem;">${entry.note}</div>
+            `;
+            list.appendChild(div);
+        });
+    },
+
+    renderAchievements() {        const grid = document.getElementById('achievementGrid');
+        grid.innerHTML = '';
+        
+        this.achievementsList.forEach(ach => {
+            const unlocked = this.state.achievements.includes(ach.id);
+            const div = document.createElement('div');
+            div.className = `achievement glass ${unlocked ? 'unlocked' : ''}`;
+            div.innerHTML = `
+                <div class="achievement-icon"><i class="fas ${ach.icon}"></i></div>
+                <div class="achievement-name">${ach.name}</div>
+            `;
+            grid.appendChild(div);
+        });
+    },
+
+    renderCharts() {
+        if (this.charts.streak) this.charts.streak.destroy();
+        if (this.charts.mood) this.charts.mood.destroy();
+
+        // Streak History Chart
+        const ctx1 = document.getElementById('streakChart').getContext('2d');
+        const relapseData = this.state.relapses.map((r, i) => {
+            const prev = i === 0 ? new Date(this.state.accountCreated) : new Date(this.state.relapses[i-1]);
+            const curr = new Date(r);
+            return Math.floor((curr - prev) / (1000 * 60 * 60 * 24));
+        });
+        
+        const currentStreakDays = Math.floor((new Date() - new Date(this.state.currentStreakStart)) / (1000 * 60 * 60 * 24));
+        const labels = [...Array(this.state.relapses.length).keys()].map(i => `Attempt ${i+1}`);
+        labels.push('Current');
+        const data = [...relapseData, currentStreakDays];
+
+        this.charts.streak = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Streak Length (Days)',
+                    data: data,
+                    borderColor: '#00f3ff',
+                    backgroundColor: 'rgba(0, 243, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                    x: { grid: { display: false }, ticks: { color: '#888' } }
+                }
+            }
+        });
+
+        // Mood Chart
+        const ctx2 = document.getElementById('moodChart').getContext('2d');
+        const last7Entries = this.state.journal.slice(-7);
+        
+        this.charts.mood = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: last7Entries.map(e => new Date(e.date).toLocaleDateString(undefined, {month:'short', day:'numeric'})),
+                datasets: [{
+                    label: 'Mood (1-5)',
+                    data: last7Entries.map(e => e.mood),
+                    backgroundColor: '#00f3ff',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { min: 1, max: 5, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                    x: { grid: { display: false }, ticks: { color: '#888' } }
+                }
+            }
+        });
+    },
+
+    renderAll() {
+        this.renderHeader();
+        this.renderStats();
+        this.updateCheckInUI(); // Ensure button state is correct on load
+        this.renderCalendar();
+        this.renderJournal();
+        this.renderAchievements();
+        setTimeout(() => this.renderCharts(), 100);
+    },
+
+    selectMood(level) {
+        this.currentMood = level;
+        document.querySelectorAll('.mood-btn').forEach((btn, idx) => {
+            if (idx + 1 === level) btn.classList.add('selected');
+            else btn.classList.remove('selected');
+        });
+    },
+    saveJournal() {
+        const note = document.getElementById('journalNote').value;
+        if (!note.trim()) {
+            this.showToast("Please write something first", "warning");
+            return;
+        }
+        
+        this.state.journal.push({
+            date: new Date().toISOString(),
+            mood: this.currentMood,
+            note: note
+        });
+        
+        this.addXP(50);
+        document.getElementById('journalNote').value = '';
+        this.saveState();
+        this.renderJournal();
+        this.renderCharts();
+        this.showToast("Journal entry saved! +50 XP", "success");
+    },
+
+    confirmReset() {
+        document.getElementById('resetModal').classList.add('active');
+    },
+
+    executeReset() {
+        const now = new Date().toISOString();
+        const streakDays = Math.floor((new Date(now) - new Date(this.state.currentStreakStart)) / (1000 * 60 * 60 * 24));
+        
+        this.state.totalCleanDays += streakDays;
+        if (streakDays > this.state.longestStreak) {
+            this.state.longestStreak = streakDays;
+        }
+        
+        this.state.relapses.push(now);
+        this.state.currentStreakStart = now;
+        this.state.lastCheckIn = null; // Reset check-in so they can check in on the new streak
+        
+        this.closeModal('resetModal');
+        this.saveState();
+        this.renderAll();
+        
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#ff3366', '#ffffff']
+        });
+                this.showToast("Streak reset. A new beginning starts now.", "warning");
+    },
+
+    showEmergency() {
+        const quote = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+        document.getElementById('emergencyQuote').textContent = `"${quote}"`;
+        document.getElementById('emergencyModal').classList.add('active');
+    },
+
+    showMilestone(days) {
+        document.getElementById('milestoneText').textContent = `Incredible! You've reached ${days} days clean. Keep up the amazing work!`;
+        document.getElementById('milestoneModal').classList.add('active');
+        confetti({
+            particleCount: 150,
+            spread: 100,
+            origin: { y: 0.6 },
+            colors: ['#00f3ff', '#ffffff', '#0066ff']
+        });
+    },
+
+    unlockAchievement(id, name) {
+        if (!this.state.achievements.includes(id)) {
+            this.state.achievements.push(id);
+            this.saveState();
+            this.renderAchievements();
+            this.showToast(`Achievement Unlocked: ${name}!`, "success");
+        }
+    },
+
+    checkAchievements() {
+        this.achievementsList.forEach(ach => {
+            if (ach.condition(this.state)) {
+                this.unlockAchievement(ach.id, ach.name);
+            }
+        });
+    },
+
+    switchTab(tabId, navItem) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        navItem.classList.add('active');
+        
+        if (tabId === 'stats') {
+            setTimeout(() => this.renderCharts(), 100);
+        }
+    },
+
+    closeModal(id) {        document.getElementById(id).classList.remove('active');
+    },
+
+    toggleSettings() {
+        const settingsTab = document.querySelector('.nav-item:last-child');
+        this.switchTab('settings', settingsTab);
+    },
+
+    exportData() {
+        const dataStr = JSON.stringify(this.state, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `apex-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        this.showToast("Data exported successfully!", "success");
+    },
+
+    importData(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                this.state = { ...this.state, ...data };
+                this.saveState();
+                this.renderAll();
+                this.showToast("Data imported successfully!", "success");
+            } catch (err) {
+                this.showToast("Invalid file format", "warning");
+            }
+        };
+        reader.readAsText(file);
+    },
+
+    requestNotificationPermission() {
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+    },
+
+    toggleNotifications() {
+        if (!("Notification" in window)) {
+            this.showToast("This browser does not support notifications", "warning");
+            return;
+        }
+                if (Notification.permission === "granted") {
+            this.state.settings.notifications = !this.state.settings.notifications;
+            document.getElementById('notifStatus').textContent = this.state.settings.notifications ? "Disable" : "Enable";
+            
+            if (this.state.settings.notifications) {
+                new Notification("Apex Tracker", { body: "Daily reminders enabled! Stay strong." });
+                this.showToast("Notifications enabled", "success");
+            } else {
+                this.showToast("Notifications disabled", "warning");
+            }
+            this.saveState();
+        } else {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    this.toggleNotifications();
+                }
+            });
+        }
+    },
+
+    setupEventListeners() {
+        if (this.state.settings.notifications && "Notification" in window && Notification.permission === "granted") {
+            setInterval(() => {
+                const now = new Date();
+                const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                if (timeStr === this.state.settings.reminderTime && now.getSeconds() === 0) {
+                    new Notification("Apex Daily Check-in", { body: "How are you doing today? Keep your streak alive!" });
+                }
+            }, 1000);
+        }
+    }
+};
+
+// Initialize App
+document.addEventListener('DOMContentLoaded', () => {
+    App.init();
+});
+</script>
+
+</body>
+</html>
