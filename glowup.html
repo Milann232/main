@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Glow Up Tracker | Premium Habit Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #050508;
+            --bg-secondary: #0a0a12;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #00f0ff;
+            --accent-glow: rgba(0, 240, 255, 0.4);
+            --success: #00ff9d;
+            --success-glow: rgba(0, 255, 157, 0.4);
+            --warning: #ffb800;
+            --text-primary: #ffffff;
+            --text-secondary: #8888a0;
+            --danger: #ff3366;
+            --radius: 16px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 255, 157, 0.05) 0%, transparent 20%);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .glass-hover:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px 0;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .stat-badge.fire {
+            background: rgba(255, 184, 0, 0.1);
+            border-color: rgba(255, 184, 0, 0.3);
+            color: var(--warning);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .stat-value.accent { color: var(--accent); }
+        .stat-value.success { color: var(--success); }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 8px;
+        }
+
+        .progress-bar-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            scrollbar-width: none;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+
+        .tab {
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        /* Habit List */
+        .habit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .habit-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .habit-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .habit-item.completed::before {
+            background: var(--success);
+            opacity: 1;
+        }
+
+        .habit-item.completed {
+            border-color: rgba(0, 255, 157, 0.3);
+            background: rgba(0, 255, 157, 0.05);
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .habit-item.completed .checkbox {
+            background: var(--success);
+            border-color: var(--success);
+            box-shadow: 0 0 10px var(--success-glow);
+        }
+
+        .checkbox svg {
+            width: 14px;
+            height: 14px;
+            color: var(--bg-primary);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .habit-item.completed .checkbox svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .habit-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .habit-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .habit-item.completed .habit-name {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .habit-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .habit-xp {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .habit-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .habit-item:hover .habit-actions {
+            opacity: 1;
+        }
+
+        @media (max-width: 640px) {
+            .habit-actions {
+                opacity: 1;
+            }
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .btn-icon.delete:hover {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--danger);
+        }
+
+        /* Analytics Section */
+        .analytics-section {
+            margin-top: 32px;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-container {
+            padding: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 200px;
+            gap: 4px;
+            overflow-x: auto;
+        }
+
+        .chart-bar-wrapper {
+            flex: 1;
+            min-width: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .chart-bar {
+            width: 100%;
+            max-width: 20px;
+            background: linear-gradient(to top, var(--accent), rgba(0, 240, 255, 0.3));
+            border-radius: 4px 4px 0 0;
+            transition: height 0.6s ease;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+
+        .chart-bar:hover::after {
+            opacity: 1;
+        }
+
+        .chart-label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            transform: rotate(-45deg);
+            white-space: nowrap;
+            margin-top: 8px;
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            padding: 16px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            position: relative;
+        }
+
+        .calendar-day.active {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .calendar-day.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success-glow);
+        }
+
+        .calendar-day.today {
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
+        }
+
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #0080ff);
+            border: none;
+            color: var(--bg-primary);
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 30px rgba(0, 240, 255, 0.6);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 200;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 400px;
+            padding: 24px;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
+        }
+
+        .form-select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        /* Notification Banner */
+        .notification-banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            z-index: 300;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .notification-banner.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Badges */
+        .badge-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            background: rgba(255, 184, 0, 0.1);
+            border: 1px solid rgba(255, 184, 0, 0.3);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Daily Challenge */
+        .challenge-card {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 255, 157, 0.05));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 16px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-card::before {
+            content: '⚡';
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            font-size: 4rem;
+            opacity: 0.1;
+        }
+
+        .challenge-title {
+            font-size: 0.8rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .challenge-desc {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .challenge-reward {
+            font-size: 0.85rem;
+            color: var(--warning);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .stat-card.full-width-mobile {
+                grid-column: 1 / -1;
+            }
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            .chart-container {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="notification-banner" id="notifBanner" onclick="requestNotificationPermission()">
+        <span>🔔</span>
+        <span>Aktifkan notifikasi untuk pengingat habit</span>
+    </div>
+
+    <div class="container">
+        <header class="header animate-in">
+            <div class="logo">GLOW UP</div>
+            <div class="user-stats">
+                <div class="stat-badge fire">
+                    <span>🔥</span>
+                    <span id="streakDisplay">0</span>
+                </div>
+                <div class="stat-badge">
+                    <span>⭐</span>
+                    <span id="levelDisplay">Lvl 1</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid animate-in" style="animation-delay: 0.1s">
+            <div class="stat-card glass">
+                <div class="stat-label">Progress Hari Ini</div>
+                <div class="stat-value accent" id="progressPercent">0%</div>
+                <div class="progress-container">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card glass">
+                <div class="stat-label">Total XP</div>
+                <div class="stat-value" id="xpDisplay">0</div>
+                <div class="stat-label" style="margin-top: 4px; font-size: 0.7rem;">
+                    <span id="xpToNext">100</span> XP lagi ke level berikutnya
+                </div>
+            </div>
+
+            <div class="stat-card glass full-width-mobile">
+                <div class="stat-label">Konsistensi 30 Hari</div>
+                <div class="stat-value success" id="consistencyDisplay">0%</div>
+                <div class="badge-container" id="badgeContainer">
+                    <!-- Badges injected here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="challenge-card glass animate-in" style="animation-delay: 0.2s" id="dailyChallenge">
+            <div class="challenge-title">Daily Challenge</div>
+            <div class="challenge-desc" id="challengeText">Selesaikan semua habit Looksmaxxing hari ini!</div>
+            <div class="challenge-reward">Reward: +50 Bonus XP</div>
+        </div>
+
+        <div class="tabs animate-in" style="animation-delay: 0.3s" id="categoryTabs">
+            <button class="tab active" data-category="all">Semua</button>
+            <button class="tab" data-category="Looksmaxxing">Looksmaxxing</button>
+            <button class="tab" data-category="Fitness">Fitness</button>
+            <button class="tab" data-category="Mindset">Mindset</button>
+            <button class="tab" data-category="Lifestyle">Lifestyle</button>
+        </div>
+
+        <div class="habit-list animate-in" id="habitList" style="animation-delay: 0.4s">
+            <!-- Habits injected here -->
+        </div>
+
+        <div class="analytics-section animate-in" style="animation-delay: 0.5s">
+            <div class="section-title">
+                <span>📊</span>
+                <span>Perkembangan 30 Hari</span>
+            </div>
+            <div class="chart-container glass" id="chartContainer">
+                <!-- Chart bars injected here -->
+            </div>
+        </div>
+
+        <div class="analytics-section animate-in" style="animation-delay: 0.6s; margin-top: 24px;">
+            <div class="section-title">
+                <span>📅</span>
+                <span>Kalender Aktivitas</span>
+            </div>
+            <div class="calendar-grid glass" id="calendarGrid">
+                <!-- Calendar injected here -->
+            </div>
+        </div>
+    </div>
+
+    <button class="fab" onclick="openModal()">+</button>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal glass">
+            <div class="modal-title" id="modalTitle">Tambah Habit</div>
+            <form id="habitForm" onsubmit="saveHabit(event)">
+                <input type="hidden" id="habitId">
+                <div class="form-group">
+                    <label class="form-label">Nama Habit</label>
+                    <input type="text" class="form-input" id="habitName" required placeholder="Contoh: Minum 2 liter air">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kategori</label>
+                    <select class="form-select" id="habitCategory" required>
+                        <option value="Looksmaxxing">Looksmaxxing</option>
+                        <option value="Fitness">Fitness</option>
+                        <option value="Mindset">Mindset</option>
+                        <option value="Lifestyle">Lifestyle</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Waktu Pengingat</label>
+                    <input type="time" class="form-input" id="habitTime">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        const defaultHabits = [
+            { id: 1, category: 'Looksmaxxing', name: 'Skincare pagi', completed: false, reminder: '07:00', xp: 10 },
+            { id: 2, category: 'Looksmaxxing', name: 'Skincare malam', completed: false, reminder: '21:00', xp: 10 },
+            { id: 3, category: 'Looksmaxxing', name: 'Sunscreen', completed: false, reminder: '07:30', xp: 15 },
+            { id: 4, category: 'Looksmaxxing', name: 'Tidak memencet jerawat', completed: false, reminder: '', xp: 20 },
+            { id: 5, category: 'Looksmaxxing', name: 'Minum 2 liter air', completed: false, reminder: '09:00', xp: 10 },
+            { id: 6, category: 'Fitness', name: 'Workout', completed: false, reminder: '17:00', xp: 20 },
+            { id: 7, category: 'Fitness', name: 'Cardio', completed: false, reminder: '06:00', xp: 15 },
+            { id: 8, category: 'Fitness', name: 'Stretching', completed: false, reminder: '22:00', xp: 10 },
+            { id: 9, category: 'Fitness', name: 'Jalan kaki 8000 langkah', completed: false, reminder: '', xp: 15 },
+            { id: 10, category: 'Mindset', name: 'Membaca 15 menit', completed: false, reminder: '20:00', xp: 15 },
+            { id: 11, category: 'Mindset', name: 'Belajar skill baru', completed: false, reminder: '19:00', xp: 20 },
+            { id: 12, category: 'Mindset', name: 'Meditasi', completed: false, reminder: '06:30', xp: 15 },
+            { id: 13, category: 'Lifestyle', name: 'Rapikan kamar', completed: false, reminder: '07:00', xp: 10 },
+            { id: 14, category: 'Lifestyle', name: 'Tidur sebelum 23.00', completed: false, reminder: '22:30', xp: 20 },
+            { id: 15, category: 'Lifestyle', name: 'Bangun pagi', completed: false, reminder: '05:30', xp: 15 },
+            { id: 16, category: 'Lifestyle', name: 'Tidak scroll medsos berlebihan', completed: false, reminder: '', xp: 20 }
+        ];
+
+        let state = {
+            habits: [],
+            user: {
+                xp: 0,
+                level: 1,
+                streak: 0,
+                lastActive: new Date().toDateString(),
+                history: {},
+                badges: [],
+                confettiShown: false
+            },
+            currentFilter: 'all'
+        };
+
+        // Initialization
+        function init() {
+            loadData();
+            checkNewDay();
+            renderAll();
+            setupNotifications();
+            setInterval(checkReminders, 60000); // Check every minute
+            
+            // Show notification banner if permission not granted
+            if ('Notification' in window && Notification.permission === 'default') {
+                setTimeout(() => {
+                    document.getElementById('notifBanner').classList.add('show');
+                }, 2000);
+            }
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('glowup_tracker');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+                // Ensure habits array exists
+                if (!state.habits.length) state.habits = [...defaultHabits];
+            } else {
+                state.habits = [...defaultHabits];
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('glowup_tracker', JSON.stringify(state));
+        }
+
+        function checkNewDay() {
+            const today = new Date().toDateString();
+            if (state.user.lastActive !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                // Check if streak continues
+                const lastDate = new Date(state.user.lastActive);
+                const diffTime = Math.abs(yesterday - lastDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays > 1) {
+                    state.user.streak = 0; // Reset streak if missed a day
+                }
+                
+                // Reset habits for new day
+                state.habits.forEach(h => h.completed = false);
+                state.user.lastActive = today;
+                state.user.confettiShown = false;
+                saveData();
+            }
+        }
+
+        // Rendering
+        function renderAll() {
+            renderStats();
+            renderHabits();
+            renderChart();
+            renderCalendar();
+            renderBadges();
+            updateChallenge();
+        }
+
+        function renderStats() {
+            const total = state.habits.length;
+            const completed = state.habits.filter(h => h.completed).length;
+            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+            
+            document.getElementById('progressPercent').textContent = percent + '%';
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('streakDisplay').textContent = state.user.streak;
+            document.getElementById('levelDisplay').textContent = 'Lvl ' + state.user.level;
+            document.getElementById('xpDisplay').textContent = state.user.xp;
+            
+            const xpToNext = (state.user.level * 100) - state.user.xp;
+            document.getElementById('xpToNext').textContent = xpToNext > 0 ? xpToNext : 0;
+
+            // Consistency calculation (last 30 days)
+            let consistentDays = 0;
+            const today = new Date();
+            for (let i = 0; i < 30; i++) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toDateString();
+                if (state.user.history[dateStr] && state.user.history[dateStr] >= (total * 0.5)) {
+                    consistentDays++;
+                }
+            }
+            const consistency = Math.round((consistentDays / 30) * 100);
+            document.getElementById('consistencyDisplay').textContent = consistency + '%';
+
+            // Confetti check
+            if (percent === 100 && !state.user.confettiShown && total > 0) {
+                triggerConfetti();
+                state.user.confettiShown = true;
+                state.user.xp += 50; // Bonus for 100%
+                checkLevelUp();
+                saveData();
+            }
+        }
+
+        function renderHabits() {
+            const list = document.getElementById('habitList');
+            list.innerHTML = '';
+            
+            const filtered = state.currentFilter === 'all' 
+                ? state.habits 
+                : state.habits.filter(h => h.category === state.currentFilter);
+
+            filtered.forEach((habit, index) => {
+                const div = document.createElement('div');
+                div.className = `habit-item glass glass-hover ${habit.completed ? 'completed' : ''}`;
+                div.style.animationDelay = `${index * 0.05}s`;
+                div.innerHTML = `
+                    <div class="checkbox" onclick="toggleHabit(${habit.id})">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <div class="habit-info">
+                        <div class="habit-name">${habit.name}</div>
+                        <div class="habit-meta">
+                            <span>${habit.category}</span>
+                            ${habit.reminder ? `<span>⏰ ${habit.reminder}</span>` : ''}
+                            <span class="habit-xp">+${habit.xp} XP</span>
+                        </div>
+                    </div>
+                    <div class="habit-actions">
+                        <button class="btn-icon" onclick="editHabit(${habit.id})">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                        <button class="btn-icon delete" onclick="deleteHabit(${habit.id})">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function renderChart() {
+            const container = document.getElementById('chartContainer');
+            container.innerHTML = '';
+            
+            const today = new Date();
+            const totalHabits = state.habits.length || 1;
+            
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toDateString();
+                const completed = state.user.history[dateStr] || 0;
+                const percent = Math.min(100, Math.round((completed / totalHabits) * 100));
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'chart-bar-wrapper';
+                wrapper.innerHTML = `
+                    <div class="chart-bar" style="height: ${percent}%" data-value="${completed}/${totalHabits}"></div>
+                    <div class="chart-label">${d.getDate()}</div>
+                `;
+                container.appendChild(wrapper);
+            }
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDay = new Date(year, month, 1).getDay();
+            
+            // Empty cells for days before start of month
+            for (let i = 0; i < firstDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = new Date(year, month, day).toDateString();
+                const div = document.createElement('div');
+                div.className = 'calendar-day';
+                div.textContent = day;
+                
+                if (day === today.getDate()) div.classList.add('today');
+                
+                if (state.user.history[dateStr] && state.user.history[dateStr] > 0) {
+                    div.classList.add('active');
+                }
+                
+                grid.appendChild(div);
+            }
+        }
+
+        function renderBadges() {
+            const container = document.getElementById('badgeContainer');
+            container.innerHTML = '';
+            
+            const badges = [];
+            if (state.user.streak >= 3) badges.push('🔥 3 Hari Streak');
+            if (state.user.streak >= 7) badges.push('👑 7 Hari Streak');
+            if (state.user.level >= 5) badges.push('⭐ Level 5');
+            if (state.user.xp >= 500) badges.push('💎 500 XP');
+            
+            badges.forEach(badge => {
+                const div = document.createElement('div');
+                div.className = 'badge';
+                div.textContent = badge;
+                container.appendChild(div);
+            });
+        }
+
+        function updateChallenge() {
+            const challenges = [
+                "Selesaikan semua habit Looksmaxxing hari ini!",
+                "Capai 100% progress harian untuk bonus XP!",
+                "Lakukan Workout dan Cardio hari ini!",
+                "Bangun pagi dan meditasi sebelum jam 7!"
+            ];
+            const random = challenges[Math.floor(Math.random() * challenges.length)];
+            document.getElementById('challengeText').textContent = random;
+        }
+
+        // Actions
+        function toggleHabit(id) {
+            const habit = state.habits.find(h => h.id === id);
+            if (!habit) return;
+            
+            habit.completed = !habit.completed;
+            
+            if (habit.completed) {
+                state.user.xp += habit.xp;
+                
+                // Update history
+                const today = new Date().toDateString();
+                state.user.history[today] = (state.user.history[today] || 0) + 1;
+                
+                // Check streak
+                if (state.user.lastActive === today) {
+                    // Already active today, check if this is the first completion
+                    const completedCount = state.habits.filter(h => h.completed).length;
+                    if (completedCount === 1) {
+                        state.user.streak += 1;
+                    }
+                }
+                
+                checkLevelUp();
+            } else {
+                state.user.xp = Math.max(0, state.user.xp - habit.xp);
+                const today = new Date().toDateString();
+                state.user.history[today] = Math.max(0, (state.user.history[today] || 1) - 1);
+            }
+            
+            saveData();
+            renderAll();
+        }
+
+        function checkLevelUp() {
+            const newLevel = Math.floor(state.user.xp / 100) + 1;
+            if (newLevel > state.user.level) {
+                state.user.level = newLevel;
+                // Could add level up animation here
+            }
+        }
+
+        function deleteHabit(id) {
+            if (confirm('Hapus habit ini?')) {
+                state.habits = state.habits.filter(h => h.id !== id);
+                saveData();
+                renderAll();
+            }
+        }
+
+        function editHabit(id) {
+            const habit = state.habits.find(h => h.id === id);
+            if (!habit) return;
+            
+            document.getElementById('habitId').value = habit.id;
+            document.getElementById('habitName').value = habit.name;
+            document.getElementById('habitCategory').value = habit.category;
+            document.getElementById('habitTime').value = habit.reminder;
+            document.getElementById('modalTitle').textContent = 'Edit Habit';
+            
+            openModal();
+        }
+
+        function saveHabit(e) {
+            e.preventDefault();
+            const id = document.getElementById('habitId').value;
+            const name = document.getElementById('habitName').value;
+            const category = document.getElementById('habitCategory').value;
+            const reminder = document.getElementById('habitTime').value;
+            
+            if (id) {
+                const habit = state.habits.find(h => h.id == id);
+                habit.name = name;
+                habit.category = category;
+                habit.reminder = reminder;
+            } else {
+                const newId = Math.max(...state.habits.map(h => h.id), 0) + 1;
+                state.habits.push({
+                    id: newId,
+                    category,
+                    name,
+                    completed: false,
+                    reminder,
+                    xp: 10
+                });
+            }
+            
+            saveData();
+            closeModal();
+            renderAll();
+        }
+
+        // Modal
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('habitForm').reset();
+            document.getElementById('habitId').value = '';
+            document.getElementById('modalTitle').textContent = 'Tambah Habit';
+        }
+
+        // Tabs
+        document.getElementById('categoryTabs').addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab')) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                state.currentFilter = e.target.dataset.category;
+                renderHabits();
+            }
+        });
+
+        // Notifications
+        function requestNotificationPermission() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        document.getElementById('notifBanner').classList.remove('show');
+                        new Notification('Glow Up Tracker', {
+                            body: 'Notifikasi diaktifkan! Kami akan mengingatkan habit kamu.',
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">✨</text></svg>'
+                        });
+                    }
+                });
+            }
+        }
+
+        function setupNotifications() {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                // Initial check
+                checkReminders();
+            }
+        }
+
+        function checkReminders() {
+            if (Notification.permission !== 'granted') return;
+            
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+            
+            state.habits.forEach(habit => {
+                if (habit.reminder === currentTime && !habit.completed) {
+                    // Check if we already notified this minute (simple debounce)
+                    const lastNotif = localStorage.getItem(`notif_${habit.id}_${now.toDateString()}`);
+                    if (!lastNotif) {
+                        new Notification('⏰ Pengingat Habit', {
+                            body: `Waktunya: ${habit.name}!`,
+                            badge: '✨',
+                            tag: `habit_${habit.id}`
+                        });
+                        localStorage.setItem(`notif_${habit.id}_${now.toDateString()}`, 'true');
+                    }
+                }
+            });
+        }
+
+        // Confetti Effect
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const particles = [];
+            const colors = ['#00f0ff', '#00ff9d', '#ffffff', '#ffb800'];
+            
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 0.5) * 15 - 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 6 + 2,
+                    life: 100,
+                    decay: Math.random() * 2 + 1
+                });
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+                
+                particles.forEach(p => {
+                    if (p.life > 0) {
+                        active = true;
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.3; // gravity
+                        p.life -= p.decay;
+                        
+                        ctx.fillStyle = p.color;
+                        ctx.globalAlpha = p.life / 100;
+                        ctx.fillRect(p.x, p.y, p.size, p.size);
+                    }
+                });
+                
+                if (active) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            
+            animate();
+        }
+
+        // Handle resize for canvas
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
