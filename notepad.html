@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#121212">
+    <title>Dark Slide Notes</title>
+    <style>
+        :root {
+            --bg-color: #0f0f14;
+            --card-bg: #1a1a23;
+            --card-bg-2: #22222e;
+            --text-primary: #e8e8ef;
+            --text-secondary: #a0a0b0;
+            --accent: #a78bfa;
+            --accent-hover: #8b5cf6;
+            --accent-glow: rgba(167, 139, 250, 0.25);
+            --danger: #f87171;
+            --danger-hover: #dc2626;
+            --success: #34d399;
+            --input-bg: #252532;
+            --border: #2d2d3d;
+            --border-hover: #3d3d52;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+        /* ============ LOGIN ============ */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 30%, #1a1a2e 0%, var(--bg-color) 70%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            width: 100%;
+            max-width: 340px;
+            border: 1px solid var(--border);
+        }
+
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .login-box h2 { margin-bottom: 0.25rem; font-size: 1.4rem; letter-spacing: -0.5px; }
+        .login-box p.subtitle { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+        .pin-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .pin-box {
+            width: 48px;            height: 56px;
+            background: var(--input-bg);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            outline: none;
+            transition: 0.2s;
+            caret-color: var(--accent);
+        }
+
+        .pin-box:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="file"],
+        textarea,
+        .note-title-input,
+        .note-content-input {
+            font-family: inherit;
+            font-size: 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        button {
+            font-family: inherit;
+            background: var(--accent);
+            color: #0f0f14;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            min-height: 44px;            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        button:hover { background: var(--accent-hover); color: white; }
+        button:active { transform: scale(0.97); }
+
+        .btn-full { width: 100%; }
+        .btn-small { padding: 8px 14px; font-size: 0.85rem; min-height: 36px; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: var(--danger-hover); color: white; }
+        .btn-secondary { background: var(--card-bg-2); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); color: white; }
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 10px;
+            font-size: 18px;
+        }
+
+        #login-error {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 12px;
+            display: none;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* ============ APP LAYOUT ============ */
+        #app-screen {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .header-title .logo-dot {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* PERBAIKAN: Tombol Tambah di desktop */
+        .btn-add-desktop {
+            display: inline-flex;
+        }
+
+        .toolbar {
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+            overflow-x: auto;
+        }
+
+        .search-box {
+            flex: 1;            min-width: 0;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        .date-pill {
+            padding: 8px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 40px;
+        }
+
+        .date-pill:hover, .date-pill.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* ============ NOTES CONTAINER ============ */
+        #notes-container {
+            flex: 1;            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: 100px; /* Ruang untuk FAB */
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 14px;
+            align-content: start;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .note-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, border-color 0.2s;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            max-height: 420px;
+            cursor: pointer;
+        }
+
+        .note-card:hover { 
+            transform: translateY(-2px); 
+            border-color: var(--accent);
+        }
+
+        .note-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .note-card:hover::before { opacity: 1; }
+
+        .note-header { margin-bottom: 8px; flex-shrink: 0; }
+
+        .note-date { 
+            font-size: 0.72rem; 
+            color: var(--text-secondary); 
+            margin-bottom: 4px;
+            display: flex;            align-items: center;
+            gap: 4px;
+        }
+
+        .note-title { 
+            font-size: 1rem; 
+            font-weight: 700; 
+            color: var(--text-primary);
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        
+        .note-image {
+            width: 100%;
+            max-height: 140px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .note-content { 
+            white-space: pre-wrap; 
+            color: var(--text-secondary); 
+            font-size: 0.88rem; 
+            line-height: 1.5;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 40px;
+            word-break: break-word;
+            padding-right: 4px;
+        }
+        
+        .note-actions {
+            margin-top: 10px;
+            padding-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            background: var(--card-bg);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 60px 20px;        }
+
+        .empty-state .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+        .empty-state h3 { margin-bottom: 6px; color: var(--text-primary); }
+
+        /* ============ MODAL DASAR ============ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 50;
+            padding: 0;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-overlay.center { align-items: center; padding: 20px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 540px;
+            max-height: 92vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            animation: slideUp 0.3s ease-out;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-overlay.center .modal-content {
+            border-radius: 16px;
+            animation: fadeIn 0.2s;            max-height: 85vh;
+        }
+
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            margin: -4px auto 8px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .modal-header h3 { font-size: 1.15rem; font-weight: 700; }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--input-bg);
+            border: none;
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            min-height: auto;
+            padding: 0;
+        }
+
+        .close-btn:hover { background: var(--border); }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            resize: vertical;
+        }
+
+        .note-title-input,
+        .note-content-input {
+            width: 100%;
+            padding: 12px;
+        }
+        .file-upload-wrapper {
+            border: 2px dashed var(--border);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .file-upload-wrapper:hover { 
+            border-color: var(--accent); 
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            display: none;
+            background: #000;
+        }
+
+        .modal-buttons { 
+            display: flex; 
+            justify-content: flex-end; 
+            gap: 8px; 
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .modal-buttons button { flex: 1; min-width: 100px; }
+
+        /* ============ MODAL PREVIEW CATATAN ============ */
+        #modal-preview .modal-content {
+            padding: 0;
+            gap: 0;
+            max-height: 100vh;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .preview-hero {
+            position: relative;
+            background: #000;
+            width: 100%;            max-height: 50vh;
+            overflow: hidden;
+        }
+
+        .preview-hero img {
+            width: 100%;
+            max-height: 50vh;
+            object-fit: contain;
+            display: block;
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+
+        .preview-hero:active img { transform: scale(0.98); }
+
+        .preview-hero .zoom-hint {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            pointer-events: none;
+        }
+
+        .preview-hero-placeholder {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, var(--accent-glow), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            opacity: 0.3;
+        }
+
+        .preview-close-float {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 36px;
+            height: 36px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);            border: none;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            z-index: 5;
+            min-height: auto;
+            padding: 0;
+        }
+
+        .preview-close-float:hover { background: rgba(0,0,0,0.8); }
+
+        .preview-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .preview-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .preview-meta .badge {
+            background: var(--accent-glow);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .preview-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .preview-content {
+            white-space: pre-wrap;
+            color: var(--text-secondary);            font-size: 0.95rem;
+            line-height: 1.7;
+            word-break: break-word;
+            max-height: 40vh;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .preview-actions button { flex: 1; }
+
+        /* ============ LIGHTBOX GAMBAR ============ */
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.97);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s;
+            padding: 0;
+        }
+
+        #lightbox img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            touch-action: pinch-zoom;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: calc(16px + var(--safe-top));
+            right: 16px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            border-radius: 50%;            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: auto;
+            padding: 0;
+            z-index: 201;
+        }
+
+        .lightbox-close:hover { background: rgba(255,255,255,0.25); }
+
+        /* ============ CALENDAR ============ */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: 10px;
+        }
+
+        .cal-day-name {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            padding: 6px 0;
+            font-weight: 600;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--input-bg);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            position: relative;
+            min-height: 40px;
+        }
+
+        .cal-day:hover { border-color: var(--accent); }
+        .cal-day.empty { background: transparent; cursor: default; }
+        .cal-day.today { 
+            border-color: var(--accent); 
+            color: var(--accent);
+            font-weight: 700;        }
+        .cal-day.selected { 
+            background: var(--accent); 
+            color: #0f0f14;
+            font-weight: 700;
+        }
+        .cal-day.has-notes::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 5px;
+            height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        .cal-day.selected.has-notes::after { background: #0f0f14; }
+
+        .cal-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cal-nav h4 { font-size: 1rem; }
+
+        /* ============ FAB - DIPERBAIKI ============ */
+        .fab {
+            position: fixed;
+            bottom: calc(20px + var(--safe-bottom));
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: #0f0f14;
+            border: none;
+            font-size: 28px;
+            box-shadow: 0 6px 20px var(--accent-glow);
+            cursor: pointer;
+            z-index: 40;
+            display: none; /* Default hidden */
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            padding: 0;
+            min-height: auto;
+        }
+
+        .fab:hover { transform: scale(1.05); color: #0f0f14; }        .fab:active { transform: scale(0.95); }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 600px) {
+            #notes-container {
+                grid-template-columns: 1fr;
+                padding: 12px;
+                padding-bottom: 100px;
+                gap: 12px;
+            }
+            .note-card { max-height: none; }
+            .note-content { max-height: 200px; }
+            header { padding: 10px 12px; }
+            .header-title { font-size: 1rem; }
+            .toolbar { padding: 10px 12px; }
+            .modal-content { padding: 16px; }
+            .preview-title { font-size: 1.2rem; }
+            .preview-content { font-size: 0.9rem; }
+            
+            /* PERBAIKAN: Tampilkan FAB di mobile */
+            .fab { display: flex; }
+            
+            /* Sembunyikan tombol desktop di mobile */
+            .btn-add-desktop { display: none; }
+        }
+
+        @media (min-width: 601px) {
+            /* Sembunyikan FAB di desktop */
+            .fab { display: none !important; }
+            /* Tampilkan tombol desktop */
+            .btn-add-desktop { display: inline-flex; }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: calc(90px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg-2);
+            color: var(--text-primary);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="login-logo">📝</div>
+            <h2>Slide Notes</h2>
+            <p class="subtitle">Catatan pribadi Anda</p>
+            <div class="pin-inputs">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+            </div>
+            <button class="btn-full" onclick="checkLogin()">Buka</button>
+            <p id="login-error">PIN salah, coba lagi</p>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app-screen">
+        <header>
+            <div class="header-title">
+                <div class="logo-dot">📝</div>
+                <span>Slide Notes</span>
+            </div>
+            <div class="header-actions">
+                <!-- PERBAIKAN: Tombol Tambah untuk desktop -->
+                <button class="btn-add-desktop" onclick="openModal()">+ Catatan Baru</button>
+                <button class="btn-icon btn-secondary" onclick="openCalendar()" title="Kalender">📅</button>
+                <button class="btn-icon btn-secondary" onclick="logout()" title="Keluar">⎋</button>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Cari catatan..." oninput="renderNotes()">
+            </div>
+            <div class="date-pill" id="filter-all" onclick="filterByDate(null)">Semua</div>
+            <div class="date-pill" id="filter-today" onclick="filterByDate('today')">Hari ini</div>
+        </div>
+
+        <div id="notes-container"></div>
+        <!-- FAB untuk mobile (akan ditampilkan via CSS media query) -->
+        <button class="fab" onclick="openModal()" aria-label="Tambah catatan">+</button>
+    </div>
+
+    <!-- MODAL TAMBAH/EDIT CATATAN -->
+    <div id="modal-add" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3 id="modal-title">Catatan Baru</h3>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            
+            <input type="text" id="note-title-input" class="note-title-input" placeholder="Judul catatan">
+            <textarea id="note-content-input" class="note-content-input" placeholder="Tulis catatan di sini..."></textarea>
+            
+            <label style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Lampiran Gambar</label>
+            <div class="file-upload-wrapper" onclick="document.getElementById('image-input').click()">
+                <div style="font-size: 24px; margin-bottom: 4px;">📷</div>
+                <span>Klik untuk upload gambar (maks 1MB)</span>
+                <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="previewImage(this)">
+            </div>
+            <img id="image-preview" class="preview-image" alt="Preview">
+            <button type="button" id="remove-image-btn" class="btn-danger btn-small" style="display: none;" onclick="removeImage()">🗑 Hapus Gambar</button>
+            
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="btn-secondary">Batal</button>
+                <button onclick="saveNote()">💾 Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PREVIEW CATATAN -->
+    <div id="modal-preview" class="modal-overlay">
+        <div class="modal-content">
+            <div class="preview-hero" id="preview-hero">
+                <button class="preview-close-float" onclick="closePreview()">✕</button>
+            </div>
+            <div class="preview-body">
+                <div class="preview-meta">
+                    <span id="preview-date">📅 -</span>
+                    <span class="badge" id="preview-badge">Catatan</span>
+                </div>
+                <h2 class="preview-title" id="preview-title">Judul</h2>
+                <div class="preview-content" id="preview-content">Isi catatan</div>
+                <div class="preview-actions">
+                    <button class="btn-secondary" onclick="editFromPreview()">✏️ Edit</button>
+                    <button class="btn-danger" onclick="deleteFromPreview()">🗑 Hapus</button>
+                </div>
+            </div>        </div>
+    </div>
+
+    <!-- LIGHTBOX GAMBAR FULL SCREEN -->
+    <div id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+        <img id="lightbox-img" src="" alt="Full Image">
+    </div>
+
+    <!-- MODAL KALENDER -->
+    <div id="modal-calendar" class="modal-overlay center">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📅 Kalender Catatan</h3>
+                <button class="close-btn" onclick="closeCalendar()">✕</button>
+            </div>
+            
+            <div class="cal-nav">
+                <button class="btn-icon btn-secondary" onclick="changeMonth(-1)">‹</button>
+                <h4 id="cal-month-label">Juni 2026</h4>
+                <button class="btn-icon btn-secondary" onclick="changeMonth(1)">›</button>
+            </div>
+            
+            <div class="calendar-grid" id="calendar-grid"></div>
+            
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <button class="btn-secondary" style="flex: 1;" onclick="goToToday()">Hari Ini</button>
+                <button class="btn-secondary" style="flex: 1;" onclick="clearFilter()">Tampilkan Semua</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== KONFIGURASI =====
+        const STORAGE_KEY = 'dark_slide_notes_v3';
+        const PIN_CODE = '0990';
+
+        let notes = [];
+        let currentImageBase64 = null;
+        let isEditing = false;
+        let editId = null;
+        let currentFilter = null;
+        let calendarDate = new Date();
+        let currentPreviewId = null;
+
+        // ===== PIN INPUT =====
+        const pinBoxes = document.querySelectorAll('.pin-box');
+        pinBoxes.forEach((box, idx) => {            box.addEventListener('input', (e) => {
+                const val = e.target.value.replace(/[^0-9]/g, '');
+                e.target.value = val;
+                if (val && idx < pinBoxes.length - 1) pinBoxes[idx + 1].focus();
+                if (idx === pinBoxes.length - 1 && val) checkLogin();
+            });
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && idx > 0) pinBoxes[idx - 1].focus();
+                if (e.key === 'Enter') checkLogin();
+            });
+        });
+
+        // ===== LOGIN =====
+        function checkLogin() {
+            let pin = '';
+            pinBoxes.forEach(b => pin += b.value);
+            const errorMsg = document.getElementById('login-error');
+            
+            if (pin === PIN_CODE) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'flex';
+                loadNotes();
+            } else {
+                errorMsg.style.display = 'block';
+                pinBoxes.forEach(b => b.value = '');
+                pinBoxes[0].focus();
+                setTimeout(() => errorMsg.style.display = 'none', 2500);
+            }
+        }
+
+        // ===== DATA =====
+        function loadNotes() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            try { notes = stored ? JSON.parse(stored) : []; } 
+            catch(e) { notes = []; }
+            renderNotes();
+            updateFilterPills();
+        }
+
+        function saveToLocal() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+            } catch(e) {
+                showToast("⚠️ Penyimpanan penuh! Gunakan gambar lebih kecil.");
+            }
+        }
+
+        // ===== FILTER =====
+        function filterByDate(type) {
+            if (type === 'today') currentFilter = formatDateKey(new Date());            else currentFilter = type;
+            updateFilterPills();
+            renderNotes();
+        }
+
+        function updateFilterPills() {
+            document.getElementById('filter-all').classList.toggle('active', currentFilter === null);
+            document.getElementById('filter-today').classList.toggle('active', currentFilter === formatDateKey(new Date()));
+        }
+
+        function getFilteredNotes() {
+            const search = document.getElementById('search-input').value.toLowerCase().trim();
+            return notes.filter(n => {
+                const matchSearch = !search || 
+                    (n.title || '').toLowerCase().includes(search) || 
+                    (n.content || '').toLowerCase().includes(search);
+                const matchDate = !currentFilter || n.dateKey === currentFilter;
+                return matchSearch && matchDate;
+            });
+        }
+
+        // ===== RENDER =====
+        function renderNotes() {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = '';
+            const filtered = getFilteredNotes();
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📝</div>
+                        <h3>Tidak ada catatan</h3>
+                        <p>${notes.length === 0 ? 'Klik tombol + untuk membuat catatan pertama' : 'Tidak ada catatan yang cocok'}</p>
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(note => {
+                const card = document.createElement('div');
+                card.className = 'note-card';
+                card.onclick = (e) => {
+                    if (e.target.closest('.note-actions')) return;
+                    openPreview(note.id);
+                };
+                
+                const imageHtml = note.image ? `<img src="${note.image}" class="note-image" alt="Gambar" loading="lazy">` : '';
+                const title = note.title || '(Tanpa judul)';
+                
+                card.innerHTML = `
+                    <div class="note-header">                        <div class="note-date">📅 ${note.date || ''}</div>
+                        <div class="note-title">${escapeHtml(title)}</div>
+                    </div>
+                    ${imageHtml}
+                    <div class="note-content">${escapeHtml(note.content || '')}</div>
+                    <div class="note-actions">
+                        <button class="btn-secondary btn-small" onclick="event.stopPropagation(); editNote(${note.id})">✏️ Edit</button>
+                        <button class="btn-danger btn-small" onclick="event.stopPropagation(); deleteNote(${note.id})">🗑 Hapus</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ===== PREVIEW =====
+        function openPreview(id) {
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+            
+            currentPreviewId = id;
+            const hero = document.getElementById('preview-hero');
+            const titleEl = document.getElementById('preview-title');
+            const contentEl = document.getElementById('preview-content');
+            const dateEl = document.getElementById('preview-date');
+            const badgeEl = document.getElementById('preview-badge');
+            
+            if (note.image) {
+                hero.innerHTML = `
+                    <button class="preview-close-float" onclick="closePreview()">✕</button>
+                    <img src="${note.image}" alt="Gambar" onclick="openLightbox('${note.image.replace(/'/g, "\\'")}')">
+                    <div class="zoom-hint">🔍 Tap untuk zoom</div>
+                `;
+            } else {
+                hero.innerHTML = `
+                    <button class="preview-close-float" onclick="closePreview()">✕</button>
+                    <div class="preview-hero-placeholder">📝</div>
+                `;
+            }
+            
+            titleEl.textContent = note.title || '(Tanpa judul)';
+            contentEl.textContent = note.content || '(Tidak ada isi)';
+            dateEl.textContent = `📅 ${note.date || '-'}`;
+            
+            if (note.image && note.content) badgeEl.textContent = '📷 + 📝';            else if (note.image) badgeEl.textContent = '📷 Foto';
+            else badgeEl.textContent = '📝 Catatan';
+            
+            document.getElementById('modal-preview').style.display = 'flex';
+        }
+
+        function closePreview() {
+            document.getElementById('modal-preview').style.display = 'none';
+            currentPreviewId = null;
+        }
+
+        function editFromPreview() {
+            if (!currentPreviewId) return;
+            const id = currentPreviewId;
+            closePreview();
+            setTimeout(() => editNote(id), 200);
+        }
+
+        function deleteFromPreview() {
+            if (!currentPreviewId) return;
+            if (confirm('Hapus catatan ini?')) {
+                notes = notes.filter(n => n.id !== currentPreviewId);
+                saveToLocal();
+                renderNotes();
+                closePreview();
+                showToast("🗑 Catatan dihapus");
+            }
+        }
+
+        // ===== LIGHTBOX =====
+        function openLightbox(src) {
+            event.stopPropagation();
+            const lb = document.getElementById('lightbox');
+            document.getElementById('lightbox-img').src = src;
+            lb.style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+        }
+
+        // ===== IMAGE UPLOAD =====
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 1024 * 1024) {
+                    showToast("⚠️ Ukuran gambar maksimal 1MB!");
+                    input.value = '';
+                    return;
+                }                const reader = new FileReader();
+                reader.onload = function(e) {
+                    compressImage(e.target.result, (compressed) => {
+                        currentImageBase64 = compressed;
+                        const preview = document.getElementById('image-preview');
+                        preview.src = compressed;
+                        preview.style.display = 'block';
+                        document.getElementById('remove-image-btn').style.display = 'block';
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function compressImage(dataUrl, callback) {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX = 1024;
+                let w = img.width, h = img.height;
+                if (w > MAX || h > MAX) {
+                    if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+                    else { w = Math.round(w * MAX / h); h = MAX; }
+                }
+                canvas.width = w;
+                canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                callback(canvas.toDataURL('image/jpeg', 0.8));
+            };
+            img.src = dataUrl;
+        }
+
+        function removeImage() {
+            currentImageBase64 = null;
+            document.getElementById('image-input').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('image-preview').src = '';
+            document.getElementById('remove-image-btn').style.display = 'none';
+        }
+
+        // ===== CRUD =====
+        function saveNote() {
+            const title = document.getElementById('note-title-input').value.trim();
+            const content = document.getElementById('note-content-input').value.trim();
+
+            if (!title && !content && !currentImageBase64) {
+                showToast("⚠️ Isi minimal judul, isi, atau gambar!");
+                return;
+            }
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            const dateKey = formatDateKey(now);
+
+            if (isEditing) {
+                const idx = notes.findIndex(n => n.id === editId);
+                if (idx !== -1) {
+                    notes[idx].title = title;
+                    notes[idx].content = content;
+                    notes[idx].image = currentImageBase64 || notes[idx].image;
+                }
+                showToast("✅ Catatan diperbarui");
+            } else {
+                notes.unshift({
+                    id: Date.now(),
+                    title, content,
+                    image: currentImageBase64,
+                    date: dateStr,
+                    dateKey: dateKey
+                });
+                showToast("✅ Catatan tersimpan");
+            }
+
+            saveToLocal();
+            renderNotes();
+            closeModal();
+        }
+
+        function editNote(id) {
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+            isEditing = true;
+            editId = id;
+            document.getElementById('modal-title').innerText = "Edit Catatan";
+            document.getElementById('note-title-input').value = note.title || '';
+            document.getElementById('note-content-input').value = note.content || '';
+            
+            if (note.image) {
+                currentImageBase64 = note.image;
+                const preview = document.getElementById('image-preview');
+                preview.src = note.image;
+                preview.style.display = 'block';
+                document.getElementById('remove-image-btn').style.display = 'block';
+            } else {
+                removeImage();
+            }
+            document.getElementById('modal-add').style.display = 'flex';
+        }
+
+        function deleteNote(id) {            if(confirm('Hapus catatan ini?')) {
+                notes = notes.filter(n => n.id !== id);
+                saveToLocal();
+                renderNotes();
+                showToast("🗑 Catatan dihapus");
+            }
+        }
+
+        // ===== MODAL =====
+        function openModal() {
+            document.getElementById('modal-add').style.display = 'flex';
+            document.getElementById('note-title-input').value = '';
+            document.getElementById('note-content-input').value = '';
+            document.getElementById('modal-title').innerText = "Catatan Baru";
+            removeImage();
+            isEditing = false;
+            editId = null;
+            setTimeout(() => document.getElementById('note-title-input').focus(), 300);
+        }
+
+        function closeModal() {
+            document.getElementById('modal-add').style.display = 'none';
+        }
+
+        // ===== CALENDAR =====
+        function formatDateKey(d) {
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function openCalendar() {
+            document.getElementById('modal-calendar').style.display = 'flex';
+            renderCalendar();
+        }
+
+        function closeCalendar() {
+            document.getElementById('modal-calendar').style.display = 'none';
+        }
+
+        function changeMonth(delta) {
+            calendarDate.setMonth(calendarDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            calendarDate = new Date();
+            currentFilter = formatDateKey(new Date());
+            updateFilterPills();
+            renderNotes();
+            renderCalendar();
+            closeCalendar();            showToast("📅 Menampilkan catatan hari ini");
+        }
+
+        function clearFilter() {
+            currentFilter = null;
+            updateFilterPills();
+            renderNotes();
+            closeCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            
+            document.getElementById('cal-month-label').innerText = `${monthNames[month]} ${year}`;
+            
+            const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+            dayNames.forEach(d => {
+                const el = document.createElement('div');
+                el.className = 'cal-day-name';
+                el.innerText = d;
+                grid.appendChild(el);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const todayKey = formatDateKey(new Date());
+
+            const notesByDate = {};
+            notes.forEach(n => {
+                if (n.dateKey) notesByDate[n.dateKey] = (notesByDate[n.dateKey] || 0) + 1;
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                const el = document.createElement('div');
+                el.className = 'cal-day empty';
+                grid.appendChild(el);
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const el = document.createElement('div');
+                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                el.className = 'cal-day';
+                if (dateKey === todayKey) el.classList.add('today');
+                if (dateKey === currentFilter) el.classList.add('selected');
+                if (notesByDate[dateKey]) el.classList.add('has-notes');                el.innerText = d;
+                el.onclick = () => selectCalendarDate(dateKey);
+                grid.appendChild(el);
+            }
+        }
+
+        function selectCalendarDate(dateKey) {
+            currentFilter = dateKey;
+            updateFilterPills();
+            renderNotes();
+            renderCalendar();
+            closeCalendar();
+            const d = new Date(dateKey);
+            const label = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            showToast(`📅 Menampilkan catatan: ${label}`);
+        }
+
+        // ===== UTILS =====
+        function logout() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-screen').style.display = 'none';
+            pinBoxes.forEach(b => b.value = '');
+            pinBoxes[0].focus();
+            currentFilter = null;
+            document.getElementById('search-input').value = '';
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.addEventListener('click', (e) => {
+                if (e.target === m) {
+                    if (m.id === 'modal-add') closeModal();
+                    else if (m.id === 'modal-calendar') closeCalendar();
+                    else if (m.id === 'modal-preview') closePreview();
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (document.getElementById('lightbox').style.display === 'flex') closeLightbox();
+                else if (document.getElementById('modal-preview').style.display === 'flex') closePreview();
+            }        });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => pinBoxes[0].focus(), 100);
+        });
+    </script>
+</body>
+</html>
