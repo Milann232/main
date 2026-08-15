@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#35151F">
+<title>for Sayangg ✦ a birthday gift</title>
+
+<!-- ============ FONT IMPORTS ============ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   CSS VARIABLES
+============================================================ */
+:root{
+  --maroon:#35151F;
+  --burgundy:#561F35;
+  --wine:#702A48;
+  --dusty-pink:#C9789A;
+  --soft-pink:#E9C8D4;
+  --light-gray:#E8E6E7;
+  --cream:#FFF8F5;
+  --gold:#D8B85A;
+  --ink:#43222E;
+  --ink-soft:#7C5A66;
+  --serif:'Playfair Display', Georgia, serif;
+  --sans:'Manrope', system-ui, sans-serif;
+  --ease:cubic-bezier(.22,.68,.24,1);
+}
+
+/* ============================================================
+   GLOBAL STYLES
+============================================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{
+  font-family:var(--sans);
+  color:var(--soft-pink);
+  background:
+    radial-gradient(130% 90% at 50% -5%, #5A2138 0%, transparent 55%),
+    radial-gradient(90% 60% at 85% 40%, rgba(112,42,72,.28) 0%, transparent 60%),
+    var(--maroon);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+body:not(.opened){overflow:hidden}
+::selection{background:var(--dusty-pink);color:var(--maroon)}
+button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit}
+img{display:block;max-width:100%}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+
+/* film grain overlay — subtle, filmic */
+body::after{
+  content:"";position:fixed;inset:-40px;z-index:200;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+/* soft vignette */
+body::before{
+  content:"";position:fixed;inset:0;z-index:150;pointer-events:none;
+  background:radial-gradient(120% 120% at 50% 45%, transparent 62%, rgba(22,6,13,.42) 100%);
+}
+
+/* scroll hairline */
+#scrollbar{position:fixed;top:0;left:0;height:2px;width:0;z-index:190;
+  background:linear-gradient(90deg,var(--gold),var(--dusty-pink));
+  box-shadow:0 0 12px rgba(216,184,90,.6)}
+
+/* shared type helpers */
+.eyebrow{
+  font-size:.66rem;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--gold);font-weight:600;display:flex;align-items:center;gap:14px;
+}
+.eyebrow::before,.eyebrow::after{content:"";height:1px;width:34px;
+  background:linear-gradient(90deg,transparent,var(--gold));opacity:.7}
+.eyebrow::after{background:linear-gradient(90deg,var(--gold),transparent)}
+h1,h2{font-family:var(--serif);font-weight:500;color:var(--cream);line-height:1.08;letter-spacing:.01em}
+h1 em,h2 em{font-style:italic;color:var(--dusty-pink)}
+
+section{position:relative;padding:clamp(90px,14vh,150px) 24px}
+.wrap{max-width:1060px;margin:0 auto;position:relative;z-index:2}
+
+/* reveal system */
+.reveal{opacity:0;transform:translateY(26px);
+  transition:opacity 1s ease var(--d,0s),transform 1s var(--ease) var(--d,0s)}
+.reveal.in{opacity:1;transform:none}
+/* line-mask word reveal */
+.w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
+.wi{display:inline-block;transform:translateY(112%);transition:transform 1s var(--ease) var(--wd,0s)}
+.in .wi{transform:none}
+
+/* ============================================================
+   SCENE 1 · OPENING — THE GIFT
+============================================================ */
+#opening{
+  position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:clamp(22px,4vh,38px);
+  background:radial-gradient(120% 85% at 50% 16%, #5B2138 0%, #3B1524 46%, #1F0A12 100%);
+  transition:opacity 1.1s ease,filter 1.1s ease,visibility 0s linear 1.1s;
+  text-align:center;padding:24px;
+}
+#opening.gone{opacity:0;filter:blur(16px);visibility:hidden;pointer-events:none}
+
+.op-eyebrow{font-size:.64rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);opacity:.9}
+.op-tap{font-size:.68rem;letter-spacing:.34em;text-transform:uppercase;color:var(--soft-pink);
+  animation:tapPulse 2.6s ease-in-out infinite}
+@keyframes tapPulse{0%,100%{opacity:.45}50%{opacity:1}}
+
+/* drifting lights */
+.orb{position:absolute;border-radius:50%;filter:blur(64px);opacity:.4;pointer-events:none}
+.orb.o1{width:44vmin;height:44vmin;background:#7A2E4F;top:6%;left:-8%;animation:drift1 22s ease-in-out infinite alternate}
+.orb.o2{width:36vmin;height:36vmin;background:rgba(201,120,154,.5);bottom:4%;right:-6%;animation:drift2 26s ease-in-out infinite alternate}
+.orb.o3{width:24vmin;height:24vmin;background:rgba(216,184,90,.3);top:30%;right:18%;animation:drift1 19s ease-in-out infinite alternate-reverse}
+@keyframes drift1{to{transform:translate(9vmin,6vmin) scale(1.12)}}
+@keyframes drift2{to{transform:translate(-7vmin,-5vmin) scale(.92)}}
+
+/* light rays behind gift */
+.rays{position:absolute;width:min(88vw,600px);aspect-ratio:1;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(216,184,90,.09) 0deg 2deg,transparent 2deg 15deg);
+  -webkit-mask:radial-gradient(circle,#000 0%,transparent 66%);mask:radial-gradient(circle,#000 0%,transparent 66%);
+  animation:slowSpin 70s linear infinite}
+@keyframes slowSpin{to{transform:rotate(360deg)}}
+
+/* the gift box */
+.gift{position:relative;width:min(236px,58vw);aspect-ratio:1/1.04;z-index:3;
+  animation:floaty 5.5s ease-in-out infinite;transition:transform .6s var(--ease)}
+.gift:hover{transform:scale(1.035)}
+.gift:active{transform:scale(.985)}
+@keyframes floaty{0%,100%{translate:0 0}50%{translate:0 -12px}}
+
+.gift .halo{position:absolute;inset:-22%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(201,120,154,.34) 0%,transparent 62%);
+  animation:halo 4.5s ease-in-out infinite alternate}
+@keyframes halo{to{opacity:.55;transform:scale(1.08)}}
+
+.gift .box{position:absolute;bottom:0;left:7%;right:7%;height:60%;z-index:2;
+  background:linear-gradient(160deg,#7A3050 0%,var(--burgundy) 55%,#451729 100%);
+  border-radius:10px 10px 16px 16px;
+  box-shadow:0 34px 60px -18px rgba(0,0,0,.65),inset 0 -14px 26px rgba(0,0,0,.3),inset 0 2px 0 rgba(233,200,212,.18)}
+.gift .box::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:15%;transform:translateX(-50%);
+  background:linear-gradient(180deg,#EAD48C,var(--gold) 45%,#B8963E);box-shadow:0 0 14px rgba(216,184,90,.35)}
+
+.gift .inner{position:absolute;bottom:34%;left:50%;width:52%;height:26%;transform:translateX(-50%) scaleY(.2);
+  transform-origin:bottom;background:radial-gradient(ellipse at bottom,rgba(255,236,190,.95),rgba(216,184,90,.4) 55%,transparent 75%);
+  opacity:0;filter:blur(6px);z-index:1;transition:opacity .7s ease .25s,transform .9s var(--ease) .25s;pointer-events:none}
+.gift.open .inner{opacity:1;transform:translateX(-50%) scaleY(1.4)}
+
+.gift .lid{position:absolute;top:19%;left:0;right:0;height:21%;z-index:4;
+  background:linear-gradient(160deg,#D98CAE 0%,var(--dusty-pink) 55%,#AE5C80 100%);
+  border-radius:8px;box-shadow:0 14px 26px -8px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,248,245,.35);
+  transform-origin:10% 100%;transition:transform 1s var(--ease) .15s,opacity 1s ease .45s}
+.gift .lid::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:14%;transform:translateX(-50%);
+  background:linear-gradient(180deg,#EAD48C,var(--gold) 50%,#B8963E)}
+.gift.open .lid{transform:rotate(-30deg) translate(-16%,-190%);opacity:0}
+
+/* gold bow */
+.gift .bow{position:absolute;top:6%;left:50%;transform:translateX(-50%);z-index:5;width:52%;height:20%;
+  transition:transform 1s var(--ease) .15s,opacity .8s ease .3s}
+.gift.open .bow{transform:translateX(-50%) translateY(-230%) rotate(-26deg) scale(1.08);opacity:0}
+.gift .bow::before,.gift .bow::after{content:"";position:absolute;top:18%;width:44%;height:74%;
+  border:4px solid var(--gold);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 60%,rgba(216,184,90,.25),transparent 70%);
+  box-shadow:0 0 12px rgba(216,184,90,.3)}
+.gift .bow::before{left:2%;transform:rotate(-24deg)}
+.gift .bow::after{right:2%;transform:rotate(24deg)}
+.gift .bow i{position:absolute;left:50%;top:44%;width:13%;aspect-ratio:1;transform:translateX(-50%);
+  background:linear-gradient(140deg,#EAD48C,#B8963E);border-radius:3px}
+
+/* sparkles */
+.spark{position:absolute;left:50%;top:42%;z-index:6;pointer-events:none;
+  width:var(--sz,8px);height:var(--sz,8px);background:var(--gold);
+  clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);
+  animation:sparkFly .95s ease-out forwards}
+@keyframes sparkFly{
+  0%{transform:translate(0,0) scale(.4);opacity:1}
+  100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+
+/* ============================================================
+   SCENE 2 · HERO + MUSIC PLAYER
+============================================================ */
+#hero{min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center}
+#hero .orb{opacity:.24}
+.hero-inner{display:flex;flex-direction:column;align-items:center;gap:26px}
+#hero h1{font-size:clamp(2.9rem,11vw,5.4rem)}
+.hero-sub{font-size:clamp(.9rem,3.4vw,1.02rem);color:rgba(233,200,212,.82);font-weight:300;
+  max-width:34ch;line-height:1.9}
+.hero-sub b{color:var(--gold);font-weight:600;font-style:italic;font-family:var(--serif);letter-spacing:.02em}
+.cue{width:1px;height:62px;overflow:hidden;position:relative;margin-top:14px;opacity:.8}
+.cue::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent,var(--gold),transparent);
+  animation:cueDrop 2.2s ease-in-out infinite}
+@keyframes cueDrop{0%{transform:translateY(-100%)}70%,100%{transform:translateY(100%)}}
+.tw{position:absolute;width:5px;height:5px;background:var(--gold);pointer-events:none;
+  clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);
+  animation:twinkle var(--td,3s) ease-in-out infinite alternate;opacity:.2}
+@keyframes twinkle{from{opacity:.1;transform:scale(.6)}to{opacity:.9;transform:scale(1.15)}}
+
+#music{padding-top:40px}
+.music-head{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;margin-bottom:52px}
+#music h2{font-size:clamp(2rem,6.5vw,3.2rem)}
+.music-blurb{font-family:var(--serif);font-style:italic;color:rgba(233,200,212,.7);font-size:1rem}
+
+/* glass player card */
+.player-card{
+  max-width:560px;margin:0 auto;padding:clamp(24px,5vw,34px);border-radius:24px;
+  background:linear-gradient(160deg,rgba(112,42,72,.44),rgba(53,21,31,.62));
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  border:1px solid rgba(233,200,212,.16);
+  box-shadow:0 34px 80px -30px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,248,245,.08)}
+.np{display:flex;gap:clamp(16px,4vw,26px);align-items:center;margin-bottom:24px}
+
+.disc{position:relative;flex:0 0 auto;width:clamp(96px,26vw,128px);aspect-ratio:1;border-radius:50%;
+  overflow:hidden;box-shadow:0 0 0 1px rgba(216,184,90,.4),0 16px 34px -12px rgba(0,0,0,.6);
+  animation:spin 22s linear infinite;animation-play-state:paused;
+  transition:box-shadow .8s ease}
+.playing .disc{animation-play-state:running;
+  box-shadow:0 0 0 1px rgba(216,184,90,.55),0 0 34px rgba(201,120,154,.4),0 16px 34px -12px rgba(0,0,0,.6)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.disc img{width:100%;height:100%;object-fit:cover;transition:opacity .5s}
+.disc .hole{position:absolute;left:50%;top:50%;width:16%;aspect-ratio:1;transform:translate(-50%,-50%);
+  border-radius:50%;background:var(--maroon);box-shadow:0 0 0 3px rgba(216,184,90,.5);z-index:2}
+.art-fallback{position:absolute;inset:0;opacity:0;transition:opacity .5s;
+  background:radial-gradient(circle at 50% 50%,var(--wine) 0%,var(--burgundy) 55%,#2C1019 100%);
+  display:grid;place-items:center;color:var(--gold)}
+.disc.noart img,.t-thumb.noart img{opacity:0}
+.disc.noart .art-fallback,.t-thumb.noart .art-fallback{opacity:1}
+
+.np-meta{min-width:0;display:flex;flex-direction:column;gap:6px}
+.np-title{font-family:var(--serif);font-size:clamp(1.2rem,4.6vw,1.45rem);color:var(--cream);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-artist{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--dusty-pink);font-weight:600}
+.np-note{font-family:var(--serif);font-style:italic;font-size:.85rem;color:rgba(233,200,212,.68);
+  line-height:1.6;transition:opacity .35s;margin-top:4px}
+
+/* progress */
+.p-row{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.p-time{font-size:.68rem;color:rgba(233,200,212,.6);font-variant-numeric:tabular-nums;min-width:34px}
+.p-track{flex:1;height:16px;display:flex;align-items:center;cursor:pointer}
+.p-line{position:relative;width:100%;height:3px;border-radius:99px;background:rgba(233,200,212,.16);overflow:visible}
+.p-fill{position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:99px;
+  background:linear-gradient(90deg,var(--gold),var(--dusty-pink))}
+.p-fill i{position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:11px;height:11px;border-radius:50%;
+  background:var(--soft-pink);box-shadow:0 0 10px rgba(201,120,154,.8)}
+
+/* controls */
+.controls{display:flex;align-items:center;justify-content:center;gap:22px}
+.ctrl{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--soft-pink);
+  transition:transform .25s var(--ease),background .3s,color .3s,box-shadow .3s}
+.ctrl:hover{background:rgba(233,200,212,.1);color:var(--cream);box-shadow:0 0 18px rgba(201,120,154,.25)}
+.ctrl:active{transform:scale(.9)}
+.ctrl svg{width:20px;height:20px;fill:currentColor}
+.ctrl-main{width:60px;height:60px;color:var(--maroon);
+  background:linear-gradient(145deg,#EAD48C,var(--gold) 55%,#C6A245);
+  box-shadow:0 10px 26px -8px rgba(216,184,90,.55)}
+.ctrl-main:hover{box-shadow:0 12px 32px -6px rgba(216,184,90,.75);color:var(--maroon);transform:translateY(-1px)}
+.ctrl-main svg{width:23px;height:23px}
+.hidden{display:none!important}
+
+.vol-row{display:none;align-items:center;gap:10px;justify-content:center;margin-top:20px;color:rgba(233,200,212,.6)}
+.vol-row svg{width:15px;height:15px;fill:currentColor}
+input[type=range]{-webkit-appearance:none;appearance:none;width:120px;height:3px;border-radius:99px;
+  background:rgba(233,200,212,.25);outline-offset:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;
+  background:var(--gold);box-shadow:0 0 8px rgba(216,184,90,.7);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:var(--gold)}
+
+.audio-note{display:none;margin-top:16px;text-align:center;font-size:.72rem;line-height:1.7;
+  color:rgba(216,184,90,.85);font-style:italic}
+
+/* playlist */
+.playlist{max-width:560px;margin:26px auto 0;display:flex;flex-direction:column;gap:8px}
+.pl-head{font-size:.62rem;letter-spacing:.36em;text-transform:uppercase;color:rgba(233,200,212,.55);
+  padding:0 6px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.pl-head::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(216,184,90,.4),transparent)}
+.track{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:11px 14px;border-radius:16px;
+  border:1px solid transparent;transition:background .35s,border-color .35s,box-shadow .35s}
+.track:hover{background:rgba(233,200,212,.06)}
+.track.active{background:rgba(201,120,154,.13);border-color:rgba(201,120,154,.38);
+  box-shadow:0 0 24px -6px rgba(201,120,154,.35)}
+.t-num{font-size:.66rem;color:rgba(233,200,212,.45);font-variant-numeric:tabular-nums;width:18px}
+.track.active .t-num{color:var(--gold)}
+.t-thumb{position:relative;width:42px;height:42px;border-radius:11px;overflow:hidden;flex:0 0 auto;
+  box-shadow:0 6px 14px -6px rgba(0,0,0,.5)}
+.t-thumb img{width:100%;height:100%;object-fit:cover}
+.t-thumb .art-fallback{font-size:15px}
+.t-meta{min-width:0;flex:1}
+.t-title{font-size:.85rem;color:var(--cream);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-artist{font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(233,200,212,.55);margin-top:3px}
+.t-dur{font-size:.66rem;color:rgba(233,200,212,.5);font-variant-numeric:tabular-nums}
+.eq{display:none;align-items:flex-end;gap:2px;height:14px}
+.track.active .eq{display:flex}
+.eq i{width:3px;background:var(--dusty-pink);border-radius:2px;animation:eqB 1s ease-in-out infinite alternate}
+.eq i:nth-child(1){height:6px;animation-delay:0s}
+.eq i:nth-child(2){height:12px;animation-delay:.25s}
+.eq i:nth-child(3){height:8px;animation-delay:.5s}
+@keyframes eqB{from{transform:scaleY(.4)}to{transform:scaleY(1)}}
+body:not(.playing) .eq i{animation-play-state:paused;transform:scaleY(.4)}
+
+/* ============================================================
+   SCENE 3 · LOVE LETTER
+============================================================ */
+#letter{
+  background:
+    radial-gradient(70% 30% at 50% 30%,rgba(201,120,154,.14),transparent 70%),
+    linear-gradient(180deg,var(--maroon) 0%,#8A6272 7%,var(--light-gray) 15%,var(--cream) 46%,#F6E3E6 78%,#C9A2B0 93%,var(--maroon) 100%);
+  padding-top:clamp(140px,20vh,200px);padding-bottom:clamp(140px,20vh,200px);
+}
+.letter-head{display:flex;flex-direction:column;align-items:center;gap:16px;margin-bottom:44px;text-align:center}
+.letter-head .eyebrow{color:var(--wine)}
+.letter-head .eyebrow::before{background:linear-gradient(90deg,transparent,var(--wine))}
+.letter-head .eyebrow::after{background:linear-gradient(90deg,var(--wine),transparent)}
+.letter-head h2{color:var(--ink);font-size:clamp(1.7rem,5.5vw,2.4rem);font-style:italic}
+
+.letter-card{
+  position:relative;max-width:620px;margin:0 auto;border-radius:20px;
+  background:linear-gradient(180deg,#FFFDFB,var(--cream));
+  border:1px solid rgba(150,90,110,.2);
+  padding:clamp(30px,7vw,58px) clamp(24px,7vw,56px);
+  box-shadow:0 34px 70px -30px rgba(110,50,75,.4),0 1px 0 rgba(255,255,255,.8) inset}
+.letter-card::before{content:"";position:absolute;inset:0;border-radius:20px;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(0deg,transparent 0 34px,rgba(150,90,110,.05) 34px 35px)}
+.l-date{display:block;text-align:right;font-size:.64rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--ink-soft);margin-bottom:26px}
+.letter-card h3{font-family:var(--serif);font-weight:500;font-size:clamp(1.6rem,5.5vw,2rem);
+  color:var(--ink);margin-bottom:8px}
+.l-orn{color:var(--dusty-pink);font-size:.9rem;letter-spacing:.5em;margin-bottom:30px}
+.letter-body p{font-family:var(--serif);font-size:clamp(.98rem,3.4vw,1.08rem);line-height:2.05;
+  color:#4A3138;margin-bottom:1.5em}
+.l-sign{text-align:right;margin-top:36px}
+.l-sign small{display:block;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+.l-sign .name{font-family:var(--serif);font-style:italic;font-size:clamp(1.6rem,6vw,2rem);color:var(--wine)}
+.l-heart{display:inline-block;margin-top:14px;color:var(--dusty-pink);animation:heartbeat 2.4s ease-in-out infinite}
+.l-heart svg{width:20px;height:20px;fill:currentColor;filter:drop-shadow(0 0 6px rgba(201,120,154,.6))}
+@keyframes heartbeat{0%,100%{transform:scale(1)}12%{transform:scale(1.18)}24%{transform:scale(1)}36%{transform:scale(1.12)}}
+
+/* letter petals */
+.petal{position:absolute;pointer-events:none;z-index:1;
+  width:15px;height:13px;background:linear-gradient(135deg,var(--soft-pink),var(--dusty-pink));
+  border-radius:78% 22% 70% 30%;opacity:.55;filter:blur(.4px);
+  animation:petalDrift var(--pd,15s) ease-in-out infinite alternate}
+@keyframes petalDrift{
+  from{transform:translate(0,0) rotate(0deg)}
+  to{transform:translate(var(--px,30px),var(--py,60px)) rotate(var(--pr,140deg))}}
+
+/* ============================================================
+   SCENE 4 · BIRTHDAY FINALE
+============================================================ */
+#finale{min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+#finale::before{content:"";position:absolute;left:50%;top:42%;width:min(90vw,760px);aspect-ratio:1;
+  transform:translate(-50%,-50%);pointer-events:none;
+  background:radial-gradient(circle,rgba(216,184,90,.22) 0%,rgba(201,120,154,.14) 34%,transparent 66%);
+  animation:halo 6s ease-in-out infinite alternate}
+.bokeh{position:absolute;border-radius:50%;filter:blur(34px);opacity:.16;pointer-events:none;
+  background:var(--dusty-pink);animation:drift1 var(--bd,24s) ease-in-out infinite alternate}
+.fin-inner{display:flex;flex-direction:column;align-items:center;gap:24px;position:relative;z-index:3}
+.cake{width:clamp(84px,20vw,110px);filter:drop-shadow(0 0 18px rgba(216,184,90,.45))}
+.cake .flame{transform-origin:48px 24px;animation:flick 1.4s ease-in-out infinite alternate}
+@keyframes flick{from{transform:scale(1) rotate(-2deg);opacity:.95}to{transform:scale(1.12,.9) rotate(2deg);opacity:.8}}
+#finale h2{font-size:clamp(2.8rem,12vw,6rem)}
+.fin-sub{font-family:var(--serif);font-style:italic;font-size:clamp(1rem,4vw,1.3rem);color:var(--soft-pink)}
+.fin-sub b{color:var(--gold);font-weight:500}
+.date-chip{font-size:.64rem;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);
+  border:1px solid rgba(216,184,90,.5);border-radius:99px;padding:10px 22px;font-weight:600;
+  box-shadow:0 0 20px -4px rgba(216,184,90,.3)}
+.fin-msg{font-size:.86rem;font-weight:300;color:rgba(233,200,212,.72);letter-spacing:.06em;max-width:36ch;line-height:1.9}
+.btn-close{margin-top:6px;padding:14px 40px;border-radius:99px;font-size:.72rem;letter-spacing:.28em;
+  text-transform:uppercase;font-weight:700;color:var(--maroon);
+  background:linear-gradient(145deg,#DD92B1,var(--dusty-pink));
+  box-shadow:0 10px 30px -8px rgba(201,120,154,.6);
+  transition:transform .3s var(--ease),box-shadow .3s}
+.btn-close:hover{transform:translateY(-2px);box-shadow:0 16px 38px -8px rgba(201,120,154,.85)}
+.btn-close:active{transform:scale(.95)}
+.fin-tail{font-size:.62rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(233,200,212,.5);margin-top:18px}
+
+/* falling petals layer */
+#fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.petal-fall{position:absolute;top:-6vh;width:14px;height:12px;opacity:0;
+  background:linear-gradient(135deg,var(--soft-pink),var(--dusty-pink));
+  border-radius:78% 22% 70% 30%;
+  animation:fall var(--fd,12s) linear var(--fdel,0s) forwards}
+.petal-fall.gold{background:linear-gradient(135deg,#EAD48C,var(--gold))}
+@keyframes fall{
+  0%{transform:translate(0,0) rotate(0);opacity:0}
+  7%{opacity:.85}
+  90%{opacity:.75}
+  100%{transform:translate(var(--sway,40px),112vh) rotate(var(--spin,320deg));opacity:0}}
+
+/* ============================================================
+   NAV / MINI PLAYER
+============================================================ */
+#dotnav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:120;
+  display:flex;flex-direction:column;gap:18px;opacity:0;pointer-events:none;transition:opacity .8s ease .6s}
+body.opened #dotnav{opacity:1;pointer-events:auto}
+.dot{display:flex;align-items:center;gap:10px;flex-direction:row-reverse;padding:4px}
+.dot i{width:6px;height:6px;border-radius:99px;background:rgba(233,200,212,.4);
+  transition:all .45s var(--ease)}
+.dot span{font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(233,200,212,.75);
+  opacity:0;transform:translateX(6px);transition:all .4s;white-space:nowrap}
+.dot:hover span,.dot.active span{opacity:1;transform:none}
+.dot.active i{height:22px;background:linear-gradient(180deg,var(--gold),var(--dusty-pink));
+  box-shadow:0 0 12px rgba(216,184,90,.7)}
+
+#mini{position:fixed;left:14px;right:14px;bottom:14px;z-index:120;display:none;
+  align-items:center;gap:12px;padding:9px 12px;border-radius:18px;
+  background:rgba(43,15,26,.82);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border:1px solid rgba(233,200,212,.18);box-shadow:0 16px 40px -12px rgba(0,0,0,.6);
+  opacity:0;transform:translateY(90px);transition:opacity .7s ease .8s,transform .7s var(--ease) .8s}
+body.opened #mini{opacity:1;transform:none}
+.m-cover{position:relative;width:40px;height:40px;border-radius:10px;overflow:hidden;flex:0 0 auto}
+.m-cover img{width:100%;height:100%;object-fit:cover}
+.m-title{flex:1;min-width:0;font-size:.74rem;color:var(--cream);font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-title small{display:block;font-size:.58rem;color:rgba(233,200,212,.55);letter-spacing:.16em;
+  text-transform:uppercase;margin-top:2px}
+.m-btn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--maroon);
+  background:linear-gradient(145deg,#EAD48C,var(--gold));flex:0 0 auto;transition:transform .25s}
+.m-btn:active{transform:scale(.9)}
+.m-btn svg{width:16px;height:16px;fill:currentColor}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (min-width:768px){
+  .vol-row{display:flex}
+  #mini{display:none!important}
+  .np{margin-bottom:28px}
+}
+@media (max-width:767px){
+  #mini{display:flex}
+  body.opened main{padding-bottom:86px}
+  #dotnav{right:auto;left:50%;top:14px;transform:translateX(-50%);flex-direction:row;gap:8px;
+    padding:9px 16px;border-radius:99px;background:rgba(32,10,18,.5);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    border:1px solid rgba(233,200,212,.14)}
+  .dot span{display:none}
+  .dot i{width:5px;height:5px}
+  .dot.active i{width:5px;height:16px}
+}
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.2s!important}
+  .reveal,.wi{opacity:1!important;transform:none!important}
+  .cue::after,.tw,.petal,.petal-fall{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- scroll progress hairline -->
+<div id="scrollbar"></div>
+
+<!-- dot navigation -->
+<nav id="dotnav" aria-label="chapters">
+  <button class="dot active" data-target="#hero"><i></i><span>01 — gift</span></button>
+  <button class="dot" data-target="#music"><i></i><span>02 — music</span></button>
+  <button class="dot" data-target="#letter"><i></i><span>03 — letter</span></button>
+  <button class="dot" data-target="#finale"><i></i><span>04 — birthday</span></button>
+</nav>
+
+<!-- ============ SCENE 1 · OPENING / THE GIFT ============ -->
+<div id="opening" role="dialog" aria-label="A gift is waiting">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <p class="op-eyebrow reveal in">✦ &nbsp;something special is waiting for you&nbsp; ✦</p>
+  <div class="rays" aria-hidden="true"></div>
+  <button class="gift" id="gift" aria-label="Tap to open the gift">
+    <span class="halo" aria-hidden="true"></span>
+    <span class="inner" aria-hidden="true"></span>
+    <span class="box" aria-hidden="true"></span>
+    <span class="lid" aria-hidden="true"></span>
+    <span class="bow" aria-hidden="true"><i></i></span>
+  </button>
+  <p class="op-tap">tap to open</p>
+</div>
+
+<main>
+  <!-- ============ SCENE 2 · HERO / FOR YOU ============ -->
+  <section id="hero">
+    <div class="tw" style="left:18%;top:24%;--td:2.6s"></div>
+    <div class="tw" style="left:78%;top:18%;--td:3.4s;animation-delay:.6s"></div>
+    <div class="tw" style="left:64%;top:70%;--td:2.9s;animation-delay:1.2s"></div>
+    <div class="tw" style="left:28%;top:64%;--td:3.8s;animation-delay:.3s"></div>
+    <div class="hero-inner reveal">
+      <p class="eyebrow">a little gift, made only for you</p>
+      <h1>
+        <span class="w"><span class="wi" style="--wd:.1s">simple</span></span>
+        <span class="w"><span class="wi" style="--wd:.22s">thing,</span></span><br>
+        <span class="w"><span class="wi" style="--wd:.38s"><em>for you</em>.</span></span>
+      </h1>
+      <p class="hero-sub">happy birthday sayangg<br>
+        hope you best.</p>
+      <div class="cue" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 2 · MUSIC PLAYER ============ -->
+  <section id="music">
+    <div class="wrap">
+      <div class="music-head">
+        <p class="eyebrow reveal">02 · music</p>
+        <h2 class="reveal" style="--d:.1s">the soundtrack <em>of us.</em></h2>
+        <p class="music-blurb reveal" style="--d:.2s">lagu my favorite ku tentang mu.</p>
+      </div>
+
+      <div class="player-card reveal" id="playerCard" style="--d:.15s">
+        <div class="np">
+          <div class="disc" id="artWrap">
+            <img id="artImg" alt="Album cover">
+            <div class="art-fallback" aria-hidden="true">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18.5a2.5 2.5 0 1 1-2-2.45V6l11-2v10.5a2.5 2.5 0 1 1-2-2.45V7.2L9 8.9z"/></svg>
+            </div>
+            <span class="hole" aria-hidden="true"></span>
+          </div>
+          <div class="np-meta">
+            <p class="np-title" id="npTitle">—</p>
+            <p class="np-artist" id="npArtist">—</p>
+            <p class="np-note" id="npNote"></p>
+          </div>
+        </div>
+
+        <div class="p-row">
+          <span class="p-time" id="tCur">0:00</span>
+          <div class="p-track" id="seek" role="slider" aria-label="Seek">
+            <div class="p-line"><div class="p-fill" id="pFill"><i></i></div></div>
+          </div>
+          <span class="p-time" id="tDur">0:00</span>
+        </div>
+
+        <div class="controls">
+          <button class="ctrl" id="btnPrev" aria-label="Previous song">
+            <svg viewBox="0 0 24 24"><path d="M6 6h2.2v12H6zM20 6v12L9.6 12z"/></svg>
+          </button>
+          <button class="ctrl ctrl-main" id="btnPlay" aria-label="Play">
+            <svg id="icoPlay" viewBox="0 0 24 24"><path d="M8.2 5.2v13.6L19.4 12z"/></svg>
+            <svg id="icoPause" class="hidden" viewBox="0 0 24 24"><path d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z"/></svg>
+          </button>
+          <button class="ctrl" id="btnNext" aria-label="Next song">
+            <svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM4 6v12l10.4-6z"/></svg>
+          </button>
+        </div>
+
+        <div class="vol-row">
+          <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a3.5 3.5 0 0 0-2-3.15v6.3a3.5 3.5 0 0 0 2-3.15z"/></svg>
+          <input type="range" id="vol" min="0" max="1" step="0.01" value="0.7" aria-label="Volume">
+        </div>
+
+        <p class="audio-note" id="audioNote"></p>
+      </div>
+
+      <div class="playlist reveal" id="playlist" style="--d:.25s">
+        <p class="pl-head">playlist ✦ three songs, three reasons</p>
+        <!-- rows rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 3 · LOVE LETTER ============ -->
+  <section id="letter">
+    <span class="petal" style="left:8%;top:16%;--pd:16s;--px:44px;--py:70px;--pr:160deg"></span>
+    <span class="petal" style="left:86%;top:22%;--pd:19s;--px:-52px;--py:88px;--pr:-120deg;animation-delay:-4s"></span>
+    <span class="petal" style="left:16%;top:68%;--pd:14s;--px:38px;--py:-46px;--pr:120deg;animation-delay:-8s"></span>
+    <span class="petal" style="left:78%;top:74%;--pd:21s;--px:-36px;--py:-60px;--pr:190deg;animation-delay:-2s"></span>
+    <span class="petal" style="left:48%;top:8%;--pd:17s;--px:26px;--py:54px;--pr:-150deg;animation-delay:-10s"></span>
+
+    <div class="wrap">
+      <div class="letter-head">
+        <p class="eyebrow reveal">03 · the letter</p>
+        <h2 class="reveal" style="--d:.1s">from my heart, in ink.</h2>
+      </div>
+
+      <div class="letter-card reveal" style="--d:.15s">
+        <span class="l-date" data-bind="birthdayDate">—</span>
+        <h3>My dearest, <span data-bind="recipientName">—</span></h3>
+        <p class="l-orn" aria-hidden="true">✦ ✦ ✦</p>
+        <div class="letter-body" id="letterBody"><!-- letter from config --></div>
+        <div class="l-sign">
+          <small>with love,</small>
+          <span class="name" data-bind="senderName">—</span><br>
+          <span class="l-heart" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.9-9.8-9.2C.6 8.6 2.6 5 6 5c2 0 3.4 1.1 4.2 2.4h1.6C12.6 6.1 14 5 16 5c3.4 0 5.4 3.6 3.8 6.8C17.5 16.1 12 21 12 21z"/></svg>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 4 · BIRTHDAY FINALE ============ -->
+  <section id="finale">
+    <div id="fx" aria-hidden="true"></div>
+    <span class="bokeh" style="left:6%;top:20%;width:180px;height:180px;--bd:26s"></span>
+    <span class="bokeh" style="right:4%;top:56%;width:230px;height:230px;background:#702A48;--bd:30s;animation-delay:-8s"></span>
+    <span class="bokeh" style="left:30%;bottom:6%;width:140px;height:140px;background:#D8B85A;--bd:22s;animation-delay:-14s"></span>
+    <div class="tw" style="left:22%;top:26%;--td:2.8s"></div>
+    <div class="tw" style="left:74%;top:20%;--td:3.6s;animation-delay:.8s"></div>
+    <div class="tw" style="left:84%;top:64%;--td:2.5s;animation-delay:1.4s"></div>
+    <div class="tw" style="left:14%;top:72%;--td:4s;animation-delay:.4s"></div>
+    <div class="tw" style="left:50%;top:12%;--td:3.1s;animation-delay:2s"></div>
+
+    <div class="fin-inner">
+      <svg class="cake reveal" viewBox="0 0 96 96" fill="none" stroke="#D8B85A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path class="flame" d="M48 26c-2.6-3-1.9-6.4 0-8.8 1.9 2.4 2.6 5.8 0 8.8z" fill="#D8B85A" stroke="none"/>
+        <path d="M48 26v9"/>
+        <path d="M36 46V40a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v6"/>
+        <path d="M26 66V50a4 4 0 0 1 4-4h36a4 4 0 0 1 4 4v16"/>
+        <path d="M26 54c3 3 6 3 9 0s6 3 9 0 6 3 9 0 6 3 9 0 6 3 8 0" stroke="#C9789A" stroke-width="2"/>
+        <path d="M20 66h56"/>
+        <path d="M28 66v8h40v-8" stroke-opacity=".65"/>
+        <path d="M14 82h68" stroke-opacity=".8"/>
+        <path d="M48 12v-4M38 15l-2.6-2.6M58 15l2.6-2.6" stroke-opacity=".55"/>
+      </svg>
+
+      <p class="eyebrow reveal" style="--d:.1s">04 · the wish</p>
+
+      <h2 class="reveal" style="--d:.18s">
+        <span class="w"><span class="wi" style="--wd:.2s">Happy</span></span>
+        <span class="w"><span class="wi" style="--wd:.36s"><em>Birthday</em></span></span>
+      </h2>
+
+      <p class="fin-sub reveal" style="--d:.3s">to the most special, <b data-bind="recipientName">—</b></p>
+      <span class="date-chip reveal" style="--d:.4s" data-bind="birthdayDate">—</span>
+      <p class="fin-msg reveal" style="--d:.5s">thank you for being part of my story.</p>
+      <button class="btn-close reveal" id="btnClose" style="--d:.6s">close ✕</button>
+      <p class="fin-tail reveal" style="--d:.7s">— with love that never runs out —</p>
+    </div>
+  </section>
+</main>
+
+<!-- mini floating player (mobile) -->
+<div id="mini">
+  <div class="m-cover">
+    <img id="mCoverImg" alt="">
+    <div class="art-fallback" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18.5a2.5 2.5 0 1 1-2-2.45V6l11-2v10.5a2.5 2.5 0 1 1-2-2.45V7.2L9 8.9z"/></svg>
+    </div>
+  </div>
+  <div class="m-title"><span id="mTitle">—</span><small id="mArtist">—</small></div>
+  <button class="m-btn" id="mBtn" aria-label="Play / pause">
+    <svg id="mIcoPlay" viewBox="0 0 24 24"><path d="M8.2 5.2v13.6L19.4 12z"/></svg>
+    <svg id="mIcoPause" class="hidden" viewBox="0 0 24 24"><path d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z"/></svg>
+  </button>
+</div>
+
+<script>
+/* ============================================================
+   JAVASCRIPT CONFIGURATION — EDIT EVERYTHING HERE ✎
+============================================================ */
+const birthdayConfig = {
+  recipientName: "inanaa",
+  senderName: ".",
+  birthdayDate: "17 Agustus",
+
+  // ✎ Ganti src dengan file mp3 lokal di folder /music.
+  //   Jika file belum ada, player tetap tampil rapi tanpa error.
+  //   Ganti cover dengan images/cover1.jpg dst. jika sudah ada file lokal.
+  songs: [
+    {
+      title: "Shape Of My Heart",
+      artist: "Backstreet Boys",
+      src: "music/song1.mp3",
+      cover: "https://picsum.photos/seed/birthday-cover-heart/400/400",
+      note: "the first song that ever made me think of you."
+    },
+    {
+      title: "Angel Baby",
+      artist: "Troye Sivan",
+      src: "music/song2.mp3",
+      cover: "https://picsum.photos/seed/birthday-cover-angel/400/400",
+      note: "for every midnight call we never wanted to end."
+    },
+    {
+      title: "My Love",
+      artist: "Westlife",
+      src: "music/song3.mp3",
+      cover: "https://picsum.photos/seed/birthday-cover-mylove/400/400",
+      note: "because somehow, every love song is about you, anjayy🤘."
+    }
+  ],
+
+  // ✎ Tulis suratmu di sini. Pisahkan paragraf dengan baris kosong.
+  letter: `happy birthday sayangg, hari ini jadi salah satu hari yang paling aku syukuri, karena di hari ini kamu lahir.
+  
+aku mungkin nggak selalu jago ngomong atau nyusun kata², tapi aku mau bilang makasih udah hadir di hidup aku. makasih buat semua sabar, perhatian, dan hal-hal kecil yang kamu lakuin yang kadang mungkin nggak kamu sadari, tapi berarti buat aku.
+
+sekarang kamu udah nambah umur lagi nich. semoga di umur yang baru ini, kamu bisa makin bahagia, makin dekat sama hal² yang kamu impiin, dan selalu dikelilingi orang-orang yang sayang sama kamu.
+
+aku nggak bisa janji semuane bakal selalu berjalan sesuai yang kita mau. tapi selama aku masih bisa, aku pengen tetap nemenin kamu, lewati cobaan yang makin kesini makin memaki🫢
+
+semoga hari ini kamu seneng yaa, sekali lagi, happy birthday sayangg. semoga hari² mu semaniz senyumanmuu.`
+};
+
+/* ============================================================
+   HELPERS
+============================================================ */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt = t => {
+  if (!isFinite(t)) return "0:00";
+  const m = Math.floor(t/60), s = Math.floor(t%60);
+  return m + ":" + String(s).padStart(2,"0");
+};
+const rand = (a,b) => a + Math.random()*(b-a);
+
+/* data-bind: isi semua elemen dengan nama/tanggal dari config */
+$$("[data-bind]").forEach(el => {
+  const v = birthdayConfig[el.dataset.bind];
+  if (v) el.textContent = v;
+});
+document.title = "for " + birthdayConfig.recipientName + " ✦ a birthday gift";
+
+/* surat → paragraf */
+birthdayConfig.letter.split(/\n\s*\n/).forEach(p => {
+  const el = document.createElement("p");
+  el.textContent = p.trim();
+  $("#letterBody").appendChild(el);
+});
+
+/* ============================================================
+   AUDIO SYSTEM — HTML5 Audio API
+============================================================ */
+const audio = new Audio();
+audio.preload = "auto";
+audio.volume = 0.7;
+
+const state = { index: 0, playing: false };
+const songs = birthdayConfig.songs;
+
+const artWrap = $("#artWrap"), artImg = $("#artImg");
+const npTitle = $("#npTitle"), npArtist = $("#npArtist"), npNote = $("#npNote");
+const pFill = $("#pFill"), tCur = $("#tCur"), tDur = $("#tDur");
+const mCoverImg = $("#mCoverImg"), mTitle = $("#mTitle"), mArtist = $("#mArtist");
+const audioNote = $("#audioNote");
+
+artImg.onerror = () => artWrap.classList.add("noart");
+artImg.onload  = () => artWrap.classList.remove("noart");
+mCoverImg.onerror = () => mCoverImg.parentElement.classList.add("noart");
+mCoverImg.onload  = () => mCoverImg.parentElement.classList.remove("noart");
+
+/* render playlist */
+const plEl = $("#playlist");
+songs.forEach((s,i) => {
+  const b = document.createElement("button");
+  b.className = "track"; b.type = "button";
+  b.setAttribute("aria-label","Play " + s.title);
+  b.innerHTML =
+    '<span class="t-num">' + String(i+1).padStart(2,"0") + '</span>' +
+    '<span class="t-thumb"><img alt=""><div class="art-fallback">♪</div></span>' +
+    '<span class="t-meta"><span class="t-title"></span><span class="t-artist"></span></span>' +
+    '<span class="t-dur">· · ·</span>' +
+    '<span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>';
+  b.querySelector(".t-title").textContent  = s.title;
+  b.querySelector(".t-artist").textContent = s.artist;
+  const thumb = b.querySelector(".t-thumb img");
+  thumb.src = s.cover;
+  thumb.onerror = () => thumb.parentElement.classList.add("noart");
+  b.addEventListener("click", () => { load(i, true); });
+  plEl.appendChild(b);
+});
+const trackEls = $$(".track");
+
+function noteTo(text){
+  npNote.style.opacity = 0;
+  setTimeout(() => { npNote.textContent = text || ""; npNote.style.opacity = 1; }, 320);
+}
+
+function load(i, autoplay){
+  state.index = ((i % songs.length) + songs.length) % songs.length;
+  const s = songs[state.index];
+  audioNote.style.display = "none";
+  audio.src = s.src; audio.load();
+  artImg.src = s.cover; mCoverImg.src = s.cover;
+  npTitle.textContent = s.title; npArtist.textContent = s.artist;
+  mTitle.textContent = s.title;  mArtist.textContent = s.artist;
+  noteTo(s.note);
+  pFill.style.width = "0%"; tCur.textContent = "0:00"; tDur.textContent = "0:00";
+  trackEls.forEach((el,k) => el.classList.toggle("active", k === state.index));
+  if (autoplay) tryPlay();
+}
+function tryPlay(){
+  const p = audio.play();
+  if (p) p.catch(() => {
+    audioNote.textContent = "sentuh tombol ▶ untuk memulai musik";
+    audioNote.style.display = "block";
+  });
+}
+function toggle(){ state.playing ? audio.pause() : tryPlay(); }
+function next(){ load(state.index + 1, true); }
+function prev(){ load(state.index - 1, true); }
+
+audio.addEventListener("play",  () => {
+  state.playing = true;
+  document.body.classList.add("playing");
+  $("#playerCard").classList.add("playing");
+  syncIcons(true);
+});
+audio.addEventListener("pause", () => {
+  state.playing = false;
+  document.body.classList.remove("playing");
+  $("#playerCard").classList.remove("playing");
+  syncIcons(false);
+});
+audio.addEventListener("ended", next);
+audio.addEventListener("timeupdate", () => {
+  if (audio.duration) {
+    pFill.style.width = (audio.currentTime / audio.duration * 100) + "%";
+    tCur.textContent = fmt(audio.currentTime);
+  }
+});
+audio.addEventListener("loadedmetadata", () => {
+  tDur.textContent = fmt(audio.duration);
+  const d = trackEls[state.index].querySelector(".t-dur");
+  if (d) d.textContent = fmt(audio.duration);
+});
+audio.addEventListener("error", () => {
+  const s = songs[state.index];
+  audioNote.innerHTML = 'file <b>' + s.src + '</b> belum tersedia — simpan mp3-nya di folder <b>/music</b>, lalu buka lagi halaman ini ✦';
+  audioNote.style.display = "block";
+});
+
+function syncIcons(playing){
+  $("#icoPlay").classList.toggle("hidden", playing);
+  $("#icoPause").classList.toggle("hidden", !playing);
+  $("#mIcoPlay").classList.toggle("hidden", playing);
+  $("#mIcoPause").classList.toggle("hidden", !playing);
+  $("#btnPlay").setAttribute("aria-label", playing ? "Pause" : "Play");
+}
+
+$("#btnPlay").addEventListener("click", toggle);
+$("#btnNext").addEventListener("click", next);
+$("#btnPrev").addEventListener("click", prev);
+$("#mBtn").addEventListener("click", toggle);
+$("#vol").addEventListener("input", e => audio.volume = +e.target.value);
+
+/* seek */
+$("#seek").addEventListener("click", e => {
+  if (!audio.duration) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+});
+
+/* ============================================================
+   SCENE TRANSITIONS — GIFT OPENING
+============================================================ */
+const gift = $("#gift"), opening = $("#opening");
+let opened = false;
+
+function burstSparkles(){
+  if (REDUCED) return;
+  for (let i = 0; i < 16; i++){
+    const sp = document.createElement("span");
+    sp.className = "spark";
+    const ang = rand(0, Math.PI*2), dist = rand(60, 170);
+    sp.style.setProperty("--tx", Math.cos(ang)*dist + "px");
+    sp.style.setProperty("--ty", (Math.sin(ang)*dist - 60) + "px");
+    sp.style.setProperty("--sz", rand(5,11) + "px");
+    sp.style.animationDelay = rand(0,.25) + "s";
+    if (Math.random() > .5) sp.style.background = "#E9C8D4";
+    gift.appendChild(sp);
+    setTimeout(() => sp.remove(), 1400);
+  }
+}
+
+function openGift(){
+  if (opened) return; opened = true;
+  gift.classList.add("open");
+  burstSparkles();
+  setTimeout(burstSparkles, 350);
+  load(0, true);                          // musik mulai dari gesture user
+  setTimeout(() => opening.classList.add("gone"), 1350);
+  setTimeout(() => {
+    document.body.classList.add("opened");
+    initObservers();                      // reveal dimulai saat hadiah terbuka
+  }, 1750);
+}
+gift.addEventListener("click", openGift);
+
+/* ============================================================
+   ANIMATION SYSTEM — petal rain on finale
+============================================================ */
+let finalePlayed = false;
+function petalRain(n){
+  if (REDUCED) return;
+  const fx = $("#fx");
+  for (let i = 0; i < n; i++){
+    const p = document.createElement("span");
+    p.className = "petal-fall" + (Math.random() > .78 ? " gold" : "");
+    p.style.left = rand(2, 96) + "%";
+    p.style.setProperty("--fd",  rand(8, 15) + "s");
+    p.style.setProperty("--fdel", rand(0, 5) + "s");
+    p.style.setProperty("--sway", rand(-90, 90) + "px");
+    p.style.setProperty("--spin", rand(180, 420) + "deg");
+    fx.appendChild(p);
+    p.addEventListener("animationend", () => p.remove());
+  }
+}
+
+/* ============================================================
+   INTERSECTION OBSERVER — reveals & nav tracking
+============================================================ */
+function initObservers(){
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      en.target.classList.add("in");
+      if (en.target.id === "finale" && !finalePlayed){
+        finalePlayed = true;
+        petalRain(16);
+        setTimeout(() => petalRain(8), 6000);
+      }
+      io.unobserve(en.target);
+    });
+  }, { threshold: 0.16 });
+  $$(".reveal").forEach(el => io.observe(el));
+}
+
+/* active chapter dot */
+const chapters = [["#hero",0],["#music",1],["#letter",2],["#finale",3]];
+const navIo = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (!en.isIntersecting) return;
+    const idx = chapters.find(c => c[0] === "#" + en.target.id)?.[1];
+    if (idx == null) return;
+    $$(".dot").forEach((d,i) => d.classList.toggle("active", i === idx));
+  });
+}, { rootMargin: "-42% 0px -52% 0px" });
+chapters.forEach(c => navIo.observe($(c[0])));
+
+$$(".dot").forEach(d => d.addEventListener("click", () => {
+  $(d.dataset.target).scrollIntoView({ behavior: REDUCED ? "auto" : "smooth" });
+}));
+
+/* ============================================================
+   SCROLL PROGRESS + CLOSE (BACK TO TOP)
+============================================================ */
+let ticking = false;
+addEventListener("scroll", () => {
+  if (ticking) return; ticking = true;
+  requestAnimationFrame(() => {
+    const h = document.documentElement;
+    const pct = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    $("#scrollbar").style.width = pct + "%";
+    ticking = false;
+  });
+}, { passive: true });
+
+/* tombol close → scroll halus kembali ke paling atas */
+$("#btnClose").addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
+});
+
+/* preload lagu pertama (tanpa play) agar siap setelah gift dibuka */
+load(0, false);
+</script>
+</body>
+</html>
