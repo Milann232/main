@@ -1569,7 +1569,48 @@ const Importer = {
 
 /* ============ 11. EVENT BINDINGS ============ */
 function bindEvents() {
-  // Menu toggle
+   // Handler untuk tombol pilih file yang lebih user-friendly
+const fileInput = document.getElementById('importFile');
+const btnChoose = document.getElementById('btnChooseFile');
+const fileInfo = document.getElementById('selectedFileInfo');
+const btnReplace = document.getElementById('btnImportReplace');
+const btnMerge = document.getElementById('btnImportMerge');
+
+// Klik tombol → trigger input file
+btnChoose.onclick = () => fileInput.click();
+
+// Saat file dipilih
+fileInput.onchange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    fileInfo.innerHTML = `✅ File terpilih: <strong>${file.name}</strong> (${(file.size/1024).toFixed(1)} KB)`;
+    btnReplace.disabled = false;
+    btnMerge.disabled = false;
+  } else {
+    fileInfo.textContent = '';
+    btnReplace.disabled = true;
+    btnMerge.disabled = true;
+  }
+};
+
+// Drag & drop support (opsional, untuk desktop)
+btnChoose.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  btnChoose.style.background = 'var(--primary)';
+});
+btnChoose.addEventListener('dragleave', () => {
+  btnChoose.style.background = '';
+});
+btnChoose.addEventListener('drop', (e) => {
+  e.preventDefault();
+  btnChoose.style.background = '';
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.json')) {
+    fileInput.files = e.dataTransfer.files;
+    fileInput.onchange({ target: { files: [file] } });
+  }
+});
+   // Menu toggle
   document.getElementById('menuToggle').onclick = () => document.getElementById('sidebar').classList.toggle('open');
 
   // Theme toggle
