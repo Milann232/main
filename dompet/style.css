@@ -239,3 +239,92 @@ textarea.input{min-height:80px;resize:vertical}
   .card{break-inside:avoid;box-shadow:none;border:1px solid #ccc}
   body{background:#fff;color:#000}
 }
+/* ============ SWIPE NAVIGATION ============ */
+.swipe-wrapper {
+  overflow: hidden;
+  position: relative;
+  flex: 1;
+}
+
+.swipe-content {
+  display: flex;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.swipe-content .page {
+  min-width: 100%;
+  flex-shrink: 0;
+}
+
+.swipe-content.swiping {
+  transition: none;
+}
+
+/* Swipe Indicator */
+.swipe-indicator {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.swipe-indicator.visible {
+  opacity: 1;
+}
+
+.swipe-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.swipe-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transition: all 0.3s;
+}
+
+.swipe-dot.active {
+  background: var(--primary);
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* Disable swipe di desktop jika diinginkan */
+@media (min-width: 901px) {
+  .swipe-indicator {
+    display: none;
+  }
+}
+
+/* Hint swipe untuk mobile */
+.swipe-hint {
+  position: fixed;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  opacity: 0.3;
+  animation: swipeHint 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 70;
+}
+
+@keyframes swipeHint {
+  0%, 100% { transform: translateY(-50%) translateX(0); opacity: 0.3; }
+  50% { transform: translateY(-50%) translateX(-10px); opacity: 0.6; }
+}
+
+/* Update bottom nav spacing */
+.bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom, 6px);
+}
