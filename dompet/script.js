@@ -60,7 +60,34 @@ const DB = (() => {
     async init() { await open(); },
     async getAll(store) { return reqPromise(tx(store).getAll()); },
     async get(store, id) { return reqPromise(tx(store).get(id)); },
-    async put(store, data) { return reqPromise(tx(store, 'readwrite').put(data)); },
+    async put(store, data) {
+  // Validasi data
+  if (!data || typeof data !== 'object') {
+    throw new Error('Data yang disimpan bukan object');
+  }
+  
+  const storeConfig = STORES[store];
+  
+  // Jika store punya keyPath, validasi key-nya
+  if (storeConfig && storeConfig.keyPath) {
+    const keyName = storeConfig.keyPath;
+    const keyValue = data[keyName];
+    
+    // Jika key tidak ada atau tidak valid, generate ID baru
+    if (keyValue === undefined || keyValue === null || keyValue === '' || 
+        keyValue === NaN || typeof keyValue === 'object' || Array.isArray(keyValue)) {
+      console.warn(`[DB] Key '${keyName}' tidak valid di store '${store}', generate baru.`, keyValue);
+      data[keyName] = U.uid(store.slice(0, 3));
+    }
+    
+    // Pastikan key adalah string atau number (tipe valid untuk IndexedDB)
+    if (typeof data[keyName] !== 'string' && typeof data[keyName] !== 'number') {
+      data[keyName] = String(data[keyName]);
+    }
+  }
+  
+  return reqPromise(tx(store, 'readwrite').put(data));
+},
     async delete(store, id) { return reqPromise(tx(store, 'readwrite').delete(id)); },
     async clear(store) { return reqPromise(tx(store, 'readwrite').clear()); },
     async putMany(store, items) {
@@ -99,7 +126,21 @@ const State = {
 
 /* ============ 3. UTILITIES ============ */
 const U = {
-  uid: () => Date.now().toString(36) + Math.random().toString(36).slice(2, 9),
+  uid: (prefix = 'id') => {
+  try {
+    const ts = Date.now().toString(36);
+    const rand = Math.random().toString(36).substring(2, 11);
+    const id = prefix + '_' + ts + rand;
+    // Validasi: harus string, tidak kosong, tidak mengandung spasi
+    if (typeof id !== 'string' || id.length < 10 || /\s/.test(id)) {
+      throw new Error('Invalid ID format');
+    }
+    return id;
+  } catch (e) {
+    // Fallback super aman
+    return prefix + '_' + Date.now() + '_' + Math.floor(Math.random() * 999999);
+  }
+},
   fmtMoney: n => {
     n = Number(n) || 0;
     const neg = n < 0;
@@ -194,17 +235,27 @@ const Router = {
     this.go();
   },
   go() {
-    const hash = (location.hash || '#dashboard').slice(1);
-    const page = this.pages.includes(hash) ? hash : 'dashboard';
-    this.pages.forEach(p => {
-      document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
-    });
-    document.querySelectorAll('.nav-item, .bn-item').forEach(el => {
-      el.classList.toggle('active', el.dataset.page === page);
-    });
-    document.getElementById('pageTitle').textContent = this.titles[page];
-    document.getElementById('sidebar').classList.remove('open');
-    // Refresh halaman aktif
+  const hash = (location.hash || '#dashboard').slice(1);
+  const page = this.pages.includes(hash) ? hash : 'dashboard';
+  
+  // Update visibility (tetap diperlukan untuk aksesibilitas)
+  this.pages.forEach(p => {
+    document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
+  });
+  
+  // Update navigasi
+  document.querySelectorAll('.nav-item, .bn-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+  
+  document.getElementById('pageTitle').textContent = this.titles[page];
+  document.getElementById('sidebar').classList.remove('open');
+  
+  // Sinkronisasi dengan swipe navigation
+  if (SwipeNav.wrapper) {
+    SwipeNav.syncWithHash();
+  } else {
+    // Fallback jika swipe belum diinit
     const refreshMap = {
       dashboard: () => Pages.dashboard.refresh(),
       transaksi: () => Pages.transaksi.refresh(),
@@ -215,9 +266,9 @@ const Router = {
       laporan: () => Pages.report.refresh(),
       pengaturan: () => Pages.settings.refresh()
     };
-    if (refreshMap[page]) refreshMap[page]();;
+    if (refreshMap[page]) refreshMap[page]();
   }
-};
+}
 
 /* ============ 6. CORE CALCULATIONS ============ */
 const Calc = {
@@ -393,6 +444,7 @@ const Chart = {
 
 /* ============ 8. DEFAULT DATA ============ */
 const DefaultData = {
+const DefaultData = {
   categories: [
     { id:'cat_gaji', name:'Gaji', type:'income', icon:'💼', color:'#10b981' },
     { id:'cat_bonus', name:'Bonus', type:'income', icon:'🎁', color:'#14b8a6' },
@@ -409,7 +461,7 @@ const DefaultData = {
   ],
   accounts: [
     { id:'acc_cash', name:'Uang Tunai', initialBalance:0, icon:'💵' },
-    { id:'acc_bank', name:'Rekening Bank', initialBalance:0, icon:'🏦' },
+    { id:'acc_bank', name:'Rekening Bank', initialBalance:0, icon:'' },
     { id:'acc_dana', name:'DANA', initialBalance:0, icon:'💙' },
     { id:'acc_gopay', name:'GoPay', initialBalance:0, icon:'💚' },
     { id:'acc_ovo', name:'OVO', initialBalance:0, icon:'💜' }
@@ -685,76 +737,129 @@ Pages.transaksi = {
     });
 
     document.getElementById('fSave').onclick = () => {
-      const tp = document.getElementById('fType').value;
-      const amount = U.parseNum(document.getElementById('fAmount').value);
-      if (amount <= 0) { Toast.show('Nominal harus lebih dari 0','error'); return; }
-      const date = document.getElementById('fDate').value;
-      if (!date) { Toast.show('Tanggal wajib diisi','error'); return; }
-      const account = document.getElementById('fAccount').value;
-      if (!account) { Toast.show('Akun wajib dipilih','error'); return; }
-      if ((tp==='income'||tp==='expense') && !document.getElementById('fCategory').value) { Toast.show('Kategori wajib dipilih','error'); return; }
-      if (tp==='transfer') {
-        const toAcc = document.getElementById('fToAccount').value;
-        if (!toAcc) { Toast.show('Akun tujuan wajib dipilih','error'); return; }
-        if (toAcc === account) { Toast.show('Akun sumber dan tujuan tidak boleh sama','error'); return; }
-      }
+  // === VALIDASI INPUT ===
+  const tp = document.getElementById('fType').value;
+  const amount = U.parseNum(document.getElementById('fAmount').value);
+  if (amount <= 0) { Toast.show('Nominal harus lebih dari 0','error'); return; }
+  
+  const date = document.getElementById('fDate').value;
+  if (!date) { Toast.show('Tanggal wajib diisi','error'); return; }
+  
+  const account = document.getElementById('fAccount').value;
+  if (!account) { Toast.show('Akun wajib dipilih','error'); return; }
+  
+  if ((tp==='income'||tp==='expense') && !document.getElementById('fCategory').value) { 
+    Toast.show('Kategori wajib dipilih','error'); return; 
+  }
+  
+  if (tp==='transfer') {
+    const toAcc = document.getElementById('fToAccount').value;
+    if (!toAcc) { Toast.show('Akun tujuan wajib dipilih','error'); return; }
+    if (toAcc === account) { Toast.show('Akun sumber dan tujuan tidak boleh sama','error'); return; }
+  }
 
-      const handleAttachment = (cb) => {
-        const file = document.getElementById('fAttachment').files[0];
-        if (!file) return cb(tx ? tx.attachment : null);
-        if (file.size > 2 * 1024 * 1024) { Toast.show('Ukuran file maksimal 2MB','error'); return; }
-        const reader = new FileReader();
-        reader.onload = e => cb(e.target.result);
-        reader.onerror = () => cb(null);
-        reader.readAsDataURL(file);
-      };
+  // === GENERATE/VALIDASI ID ===
+  let txId = null;
+  
+  if (tx && tx.id) {
+    // Mode edit: gunakan ID existing TAPI validasi dulu
+    if (typeof tx.id === 'string' && tx.id.length >= 3) {
+      txId = tx.id;
+    } else {
+      console.warn('[Transaksi] ID existing tidak valid, generate baru:', tx.id);
+      txId = null;
+    }
+  }
+  
+  if (!txId) {
+    txId = U.uid('tx');
+    console.log('[Transaksi] ID baru:', txId);
+  }
 
-      handleAttachment(att => {
-        const data = {
-          id: tx ? tx.id : U.uid(),
-          type: tp,
-          date: new Date(date + 'T' + (new Date()).toTimeString().slice(0,5)).toISOString(),
-          amount,
-          category: (tp==='income'||tp==='expense') ? document.getElementById('fCategory').value : null,
-          account,
-          toAccount: tp==='transfer' ? document.getElementById('fToAccount').value : null,
-          savingId: (tp==='savings-deposit'||tp==='savings-withdraw') ? document.getElementById('fSaving').value : null,
-          debtId: tp==='debt-payment' ? document.getElementById('fDebt').value : null,
-          method: document.getElementById('fMethod').value.trim(),
-          note: document.getElementById('fNote').value.trim(),
-          attachment: att,
-          createdAt: tx ? tx.createdAt : Date.now(),
-          updatedAt: Date.now()
-        };
-        DB.put('transactions', data).then(async () => {
-          // Update saldo tabungan jika relevan
-          if (data.type === 'savings-deposit' && data.savingId) {
-            const s = State.savings.find(x => x.id === data.savingId);
-            if (s) { s.collected = (Number(s.collected)||0) + amount; await DB.put('savings', s);
-              await DB.put('savingLogs', { id:U.uid(), savingId:s.id, type:'deposit', amount, date:data.date, txId:data.id }); }
-          } else if (data.type === 'savings-withdraw' && data.savingId) {
-            const s = State.savings.find(x => x.id === data.savingId);
-            if (s) { s.collected = Math.max(0, (Number(s.collected)||0) - amount); await DB.put('savings', s);
-              await DB.put('savingLogs', { id:U.uid(), savingId:s.id, type:'withdraw', amount, date:data.date, txId:data.id }); }
-          }
-          if (data.type === 'debt-payment' && data.debtId) {
-            const d = State.debts.find(x => x.id === data.debtId);
-            if (d) {
-              d.remaining = Math.max(0, (Number(d.remaining)||0) - amount);
-              d.paid = (Number(d.paid)||0) + amount;
-              if (d.remaining <= 0) d.status = 'lunas';
-              await DB.put('debts', d);
-              await DB.put('debtLogs', { id:U.uid(), debtId:d.id, amount, date:data.date, txId:data.id, note:data.note });
-            }
-          }
-          await reloadAll();
-          Toast.show(isEdit ? 'Transaksi diperbarui' : 'Transaksi ditambahkan', 'success');
-          Modal.close();
-          Pages.dashboard.refresh();
-          this.renderList();
-        }).catch(err => { Toast.show('Gagal menyimpan: ' + err.message, 'error'); });
-      });
+  // === HANDLE LAMPIRAN ===
+  const handleAttachment = (cb) => {
+    const file = document.getElementById('fAttachment').files[0];
+    if (!file) return cb(tx ? tx.attachment : null);
+    if (file.size > 2 * 1024 * 1024) { 
+      Toast.show('Ukuran file maksimal 2MB','error'); 
+      return; 
+    }
+    const reader = new FileReader();
+    reader.onload = e => cb(e.target.result);
+    reader.onerror = () => cb(null);
+    reader.readAsDataURL(file);
+  };
+
+  // === SIMPAN DATA ===
+  handleAttachment(att => {
+    const data = {
+      id: txId,  // ID yang sudah divalidasi
+      type: tp,
+      date: new Date(date + 'T' + (new Date()).toTimeString().slice(0,5)).toISOString(),
+      amount,
+      category: (tp==='income'||tp==='expense') ? document.getElementById('fCategory').value : null,
+      account,
+      toAccount: tp==='transfer' ? document.getElementById('fToAccount').value : null,
+      savingId: (tp==='savings-deposit'||tp==='savings-withdraw') ? document.getElementById('fSaving').value : null,
+      debtId: tp==='debt-payment' ? document.getElementById('fDebt').value : null,
+      method: document.getElementById('fMethod').value.trim(),
+      note: document.getElementById('fNote').value.trim(),
+      attachment: att,
+      createdAt: tx ? tx.createdAt : Date.now(),
+      updatedAt: Date.now()
     };
+    
+    console.log('[Transaksi] Menyimpan:', data);
+    
+    DB.put('transactions', data).then(async () => {
+      // Update saldo tabungan jika relevan
+      if (data.type === 'savings-deposit' && data.savingId) {
+        const s = State.savings.find(x => x.id === data.savingId);
+        if (s) { 
+          s.collected = (Number(s.collected)||0) + amount; 
+          await DB.put('savings', s);
+          await DB.put('savingLogs', { 
+            id: U.uid('sl'), savingId: s.id, type: 'deposit', 
+            amount, date: data.date, txId: data.id 
+          }); 
+        }
+      } else if (data.type === 'savings-withdraw' && data.savingId) {
+        const s = State.savings.find(x => x.id === data.savingId);
+        if (s) { 
+          s.collected = Math.max(0, (Number(s.collected)||0) - amount); 
+          await DB.put('savings', s);
+          await DB.put('savingLogs', { 
+            id: U.uid('sl'), savingId: s.id, type: 'withdraw', 
+            amount, date: data.date, txId: data.id 
+          }); 
+        }
+      }
+      
+      if (data.type === 'debt-payment' && data.debtId) {
+        const d = State.debts.find(x => x.id === data.debtId);
+        if (d) {
+          d.remaining = Math.max(0, (Number(d.remaining)||0) - amount);
+          d.paid = (Number(d.paid)||0) + amount;
+          if (d.remaining <= 0) d.status = 'lunas';
+          await DB.put('debts', d);
+          await DB.put('debtLogs', { 
+            id: U.uid('dl'), debtId: d.id, amount, 
+            date: data.date, txId: data.id, note: data.note 
+          });
+        }
+      }
+      
+      await reloadAll();
+      Toast.show(isEdit ? 'Transaksi diperbarui' : 'Transaksi ditambahkan', 'success');
+      Modal.close();
+      Pages.dashboard.refresh();
+      Pages.transaksi.renderList();
+    }).catch(err => { 
+      console.error('[Transaksi] Error simpan:', err);
+      Toast.show('Gagal menyimpan: ' + err.message, 'error'); 
+    });
+  });
+};
   },
   viewDetail(id) {
     const t = State.transactions.find(x => x.id === id);
@@ -1870,7 +1975,44 @@ btnChoose.addEventListener('drop', (e) => {
       Pages.dashboard.refresh();
     });
   };
-}
+   
+// Handler untuk tombol perbaiki data rusak
+document.getElementById('btnFixData').onclick = async () => {
+  Modal.confirm('Perbaiki Data Rusak', 
+    'Aplikasi akan memindai dan memperbaiki semua ID yang tidak valid di database. Data Anda akan tetap aman. Lanjutkan?', 
+    async () => {
+      try {
+        let fixed = 0;
+        const stores = ['transactions','categories','accounts','savings','savingLogs','debts','debtLogs','budgets','schedules'];
+        
+        for (const storeName of stores) {
+          const items = await DB.getAll(storeName);
+          for (const item of items) {
+            const keyName = STORES[storeName].keyPath;
+            const key = item[keyName];
+            
+            // Cek apakah key valid
+            if (key === undefined || key === null || key === '' || 
+                typeof key !== 'string' && typeof key !== 'number') {
+              // Generate ID baru
+              const newId = U.uid(storeName.slice(0, 3));
+              item[keyName] = newId;
+              await DB.put(storeName, item);
+              fixed++;
+              console.log(`[Fix] ${storeName}: ${key} → ${newId}`);
+            }
+          }
+        }
+        
+        await reloadAll();
+        Toast.show(`Berhasil memperbaiki ${fixed} data rusak`, 'success', 5000);
+        Pages.dashboard.refresh();
+      } catch (err) {
+        Toast.show('Gagal memperbaiki: ' + err.message, 'error');
+      }
+    }
+  );
+};
 
 /* ============ 12. THEME ============ */
 function applyTheme() {
@@ -1917,25 +2059,212 @@ async function init() {
     applyTheme();
     bindEvents();
     Router.init();
+    
+    // Init swipe navigation
+    SwipeNav.init();
+    
     // Default date inputs
     document.getElementById('dateFrom').value = U.todayISO();
     document.getElementById('dateTo').value = U.todayISO();
+    
     // PWA registration
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
+    
     console.log('DompetKu siap digunakan');
   } catch (err) {
     console.error(err);
     Toast.show('Gagal memuat aplikasi: ' + err.message, 'error', 8000);
   }
 }
-
 // Prevent double-submit on forms
 document.addEventListener('submit', e => {
   const btn = e.target.querySelector('button[type="submit"]');
   if (btn && btn.disabled) { e.preventDefault(); return; }
   if (btn) { btn.disabled = true; setTimeout(() => btn.disabled = false, 1000); }
 });
+/* ============ 14. SWIPE NAVIGATION ============ */
+const SwipeNav = {
+  pages: ['dashboard', 'transaksi', 'tabungan', 'utang', 'anggaran', 'kalender', 'laporan', 'pengaturan'],
+  currentIndex: 0,
+  startX: 0,
+  currentX: 0,
+  isSwiping: false,
+  threshold: 50, // minimal 50px untuk trigger swipe
+  wrapper: null,
+  content: null,
+  indicator: null,
+  hintTimeout: null,
 
+  init() {
+    this.wrapper = document.getElementById('swipeWrapper');
+    this.content = document.getElementById('swipeContent');
+    this.indicator = document.getElementById('swipeIndicator');
+    
+    if (!this.wrapper || !this.content) return;
+
+    // Setup pages untuk flex layout
+    this.pages.forEach(page => {
+      const el = document.getElementById('page-' + page);
+      if (el) {
+        el.classList.remove('hidden');
+        el.style.minWidth = '100%';
+        el.style.flexShrink = '0';
+      }
+    });
+
+    // Touch events (mobile)
+    this.wrapper.addEventListener('touchstart', (e) => this.handleStart(e.touches[0].clientX), { passive: true });
+    this.wrapper.addEventListener('touchmove', (e) => this.handleMove(e.touches[0].clientX), { passive: true });
+    this.wrapper.addEventListener('touchend', (e) => this.handleEnd(e.changedTouches[0].clientX), { passive: true });
+
+    // Mouse events (desktop)
+    this.wrapper.addEventListener('mousedown', (e) => this.handleStart(e.clientX));
+    this.wrapper.addEventListener('mousemove', (e) => {
+      if (this.isSwiping) this.handleMove(e.clientX);
+    });
+    this.wrapper.addEventListener('mouseup', (e) => {
+      if (this.isSwiping) this.handleEnd(e.clientX);
+    });
+    this.wrapper.addEventListener('mouseleave', () => {
+      if (this.isSwiping) this.handleEnd(this.startX);
+    });
+
+    // Buat dots indicator
+    this.createDots();
+    
+    // Set initial position
+    this.goToPage(0, false);
+
+    // Tampilkan hint swipe setelah 2 detik
+    setTimeout(() => this.showHint(), 2000);
+  },
+
+  createDots() {
+    if (!this.indicator) return;
+    const dotsContainer = this.indicator.querySelector('.swipe-dots');
+    dotsContainer.innerHTML = this.pages.map((_, i) => 
+      `<div class="swipe-dot ${i === 0 ? 'active' : ''}"></div>`
+    ).join('');
+  },
+
+  handleStart(x) {
+    this.startX = x;
+    this.currentX = x;
+    this.isSwiping = true;
+    this.content.classList.add('swiping');
+    this.indicator?.classList.add('visible');
+  },
+
+  handleMove(x) {
+    if (!this.isSwiping) return;
+    this.currentX = x;
+    const diff = x - this.startX;
+    const offset = -(this.currentIndex * 100) + (diff / this.wrapper.offsetWidth * 100);
+    this.content.style.transform = `translateX(${offset}%)`;
+  },
+
+  handleEnd(x) {
+    if (!this.isSwiping) return;
+    this.isSwiping = false;
+    this.content.classList.remove('swiping');
+    
+    const diff = x - this.startX;
+    const absDiff = Math.abs(diff);
+    
+    if (absDiff > this.threshold) {
+      if (diff > 0 && this.currentIndex > 0) {
+        // Swipe kanan → halaman sebelumnya
+        this.goToPage(this.currentIndex - 1);
+      } else if (diff < 0 && this.currentIndex < this.pages.length - 1) {
+        // Swipe kiri → halaman berikutnya
+        this.goToPage(this.currentIndex + 1);
+      } else {
+        // Batas halaman, bounce back
+        this.goToPage(this.currentIndex);
+      }
+    } else {
+      // Tidak cukup jauh, kembali ke posisi semula
+      this.goToPage(this.currentIndex);
+    }
+
+    // Sembunyikan indicator setelah 1.5 detik
+    setTimeout(() => {
+      this.indicator?.classList.remove('visible');
+    }, 1500);
+  },
+
+  goToPage(index, animate = true) {
+    if (index < 0 || index >= this.pages.length) return;
+    
+    this.currentIndex = index;
+    const pageId = this.pages[index];
+    
+    if (!animate) {
+      this.content.style.transition = 'none';
+    } else {
+      this.content.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    }
+    
+    this.content.style.transform = `translateX(-${index * 100}%)`;
+    
+    // Update URL hash
+    if (location.hash !== '#' + pageId) {
+      history.replaceState(null, '', '#' + pageId);
+    }
+    
+    // Update active state di navigasi
+    document.querySelectorAll('.nav-item, .bn-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.page === pageId);
+    });
+    
+    // Update page title
+    document.getElementById('pageTitle').textContent = Router.titles[pageId] || pageId;
+    
+    // Update dots
+    document.querySelectorAll('.swipe-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+    
+    // Refresh halaman yang aktif
+    const refreshMap = {
+      dashboard: () => Pages.dashboard.refresh(),
+      transaksi: () => Pages.transaksi.refresh(),
+      tabungan: () => Pages.savings.refresh(),
+      utang: () => Pages.debts.refresh(),
+      anggaran: () => Pages.budget.refresh(),
+      kalender: () => Pages.calendar.refresh(),
+      laporan: () => Pages.report.refresh(),
+      pengaturan: () => Pages.settings.refresh()
+    };
+    
+    if (refreshMap[pageId]) {
+      setTimeout(() => refreshMap[pageId](), 100);
+    }
+  },
+
+  showHint() {
+    if (this.currentIndex === 0 && !localStorage.getItem('swipeHintShown')) {
+      const hint = document.createElement('div');
+      hint.className = 'swipe-hint';
+      hint.textContent = '👉';
+      document.body.appendChild(hint);
+      
+      setTimeout(() => {
+        hint.remove();
+        localStorage.setItem('swipeHintShown', '1');
+      }, 3000);
+    }
+  },
+
+  // Method untuk dipanggil dari navigasi biasa
+  syncWithHash() {
+    const hash = (location.hash || '#dashboard').slice(1);
+    const index = this.pages.indexOf(hash);
+    if (index !== -1 && index !== this.currentIndex) {
+      this.goToPage(index);
+    }
+  }
+};
 init();
