@@ -206,16 +206,16 @@ const Router = {
     document.getElementById('sidebar').classList.remove('open');
     // Refresh halaman aktif
     const refreshMap = {
-      dashboard: Pages.dashboard.refresh,
-      transaksi: Pages.transaksi.refresh,
-      tabungan: Pages.savings.refresh,
-      utang: Pages.debts.refresh,
-      anggaran: Pages.budget.refresh,
-      kalender: Pages.calendar.refresh,
-      laporan: Pages.report.refresh,
-      pengaturan: Pages.settings.refresh
+      dashboard: () => Pages.dashboard.refresh(),
+      transaksi: () => Pages.transaksi.refresh(),
+      tabungan: () => Pages.savings.refresh(),
+      utang: () => Pages.debts.refresh(),
+      anggaran: () => Pages.budget.refresh(),
+      kalender: () => Pages.calendar.refresh(),
+      laporan: () => Pages.report.refresh(),
+      pengaturan: () => Pages.settings.refresh()
     };
-    if (refreshMap[page]) refreshMap[page]();
+    if (refreshMap[page]) refreshMap[page]();;
   }
 };
 
