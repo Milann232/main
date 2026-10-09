@@ -54,14 +54,21 @@
 <!-- MAIN CONTENT -->
 <main class="main">
   <header class="topbar">
+<div class="swipe-indicator" id="swipeIndicator">
+  <div class="swipe-dots"></div>
+</div>
     <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
     <h2 class="page-title" id="pageTitle">Dashboard</h2>
     <div class="topbar-actions">
       <button class="btn-icon" id="themeToggle" title="Ganti tema">🌙</button>
     </div>
   </header>
-
-  <div class="content">
+  
+<div class="swipe-wrapper" id="swipeWrapper">
+  <div class="content" id="swipeContent">
+    <!-- semua section page tetap di sini -->
+  </div>
+</div>
 
     <!-- ===================== PAGE 1: DASHBOARD ===================== -->
     <section class="page" id="page-dashboard">
