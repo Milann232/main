@@ -343,13 +343,24 @@
       </div>
 
       <div class="card">
-        <div class="card-header"><h3>Impor & Pemulihan</h3></div>
-        <p class="muted">Impor file backup JSON. Sebelum dipulihkan, Anda akan melihat ringkasan isi dan diminta konfirmasi. Pilih mode: <strong>ganti</strong> (timpa semua data) atau <strong>gabungkan</strong> (tanpa duplikasi ID).</p>
-        <input type="file" id="importFile" accept=".json" class="input" />
-        <div class="btn-group">
-          <button class="btn btn-primary" id="btnImportReplace">Pulihkan (Ganti Data)</button>
-          <button class="btn" id="btnImportMerge">Pulihkan (Gabungkan)</button>
-        </div>
+  <div class="card-header"><h3>Impor & Pemulihan</h3></div>
+  <p class="muted">Pilih file backup JSON dari perangkat Anda. Sebelum dipulihkan, Anda akan melihat ringkasan isi file.</p>
+  
+  <!-- Tombol pilih file yang lebih jelas -->
+  <div style="margin: 16px 0;">
+    <button class="btn btn-primary" id="btnChooseFile" style="width: 100%; padding: 14px;">
+       Pilih File Backup
+    </button>
+    <input type="file" id="importFile" accept=".json" style="display: none;" />
+  </div>
+  
+  <!-- Tampilkan nama file yang dipilih -->
+  <div id="selectedFileInfo" class="muted" style="margin-bottom: 12px;"></div>
+  
+  <div class="btn-group">
+    <button class="btn btn-primary" id="btnImportReplace" disabled>🔄 Pulihkan (Ganti Data)</button>
+    <button class="btn" id="btnImportMerge" disabled>➕ Pulihkan (Gabungkan)</button>
+  </div>
       </div>
 
       <div class="card danger-zone">
