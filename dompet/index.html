@@ -72,120 +72,121 @@
 
     <!-- ===================== PAGE 1: DASHBOARD ===================== -->
     <section class="page" id="page-dashboard">
-      <div class="period-bar">
-        <div class="period-selector" id="periodSelector">
-          <button data-period="today">Hari Ini</button>
-          <button data-period="week">Minggu Ini</button>
-          <button data-period="month" class="active">Bulan Ini</button>
-          <button data-period="year">Tahun Ini</button>
-          <button data-period="custom">Rentang</button>
-        </div>
-        <div class="custom-range" id="customRange" style="display:none">
-          <input type="date" id="dateFrom" />
-          <span>s/d</span>
-          <input type="date" id="dateTo" />
-          <button class="btn btn-sm" id="applyRange">Terapkan</button>
-        </div>
-      </div>
-
-      <div class="card remaining-balance-card">
-  <div class="remaining-balance-header">
-    <div>
-      <div class="remaining-label">TOTAL SALDO TERSISA</div>
-      <div class="remaining-sublabel">Saldo yang bisa digunakan</div>
+  <div class="period-bar">
+    <div class="period-selector" id="periodSelector">
+      <button data-period="today">Hari Ini</button>
+      <button data-period="week">Minggu Ini</button>
+      <button data-period="month" class="active">Bulan Ini</button>
+      <button data-period="year">Tahun Ini</button>
+      <button data-period="custom">Rentang</button>
     </div>
-    <div class="remaining-icon"></div>
-  </div>
-  <div class="remaining-amount" id="statRemaining">Rp0</div>
-  <div class="remaining-breakdown">
-    <div class="breakdown-item">
-      <span class="breakdown-label">Saldo Total</span>
-      <span class="breakdown-value" id="breakdownTotal">Rp0</span>
-    </div>
-    <div class="breakdown-item">
-      <span class="breakdown-label">− Utang</span>
-      <span class="breakdown-value negative" id="breakdownDebt">Rp0</span>
-    </div>
-    <div class="breakdown-item">
-      <span class="breakdown-label">− Tabungan</span>
-      <span class="breakdown-value negative" id="breakdownSavings">Rp0</span>
-    </div>
-    <div class="breakdown-divider"></div>
-    <div class="breakdown-item total">
-      <span class="breakdown-label"><strong>Tersisa</strong></span>
-      <span class="breakdown-value" id="breakdownRemaining"><strong>Rp0</strong></span>
+    <div class="custom-range" id="customRange" style="display:none">
+      <input type="date" id="dateFrom" />
+      <span>s/d</span>
+      <input type="date" id="dateTo" />
+      <button class="btn btn-sm" id="applyRange">Terapkan</button>
     </div>
   </div>
-      </div>
 
-      <div class="grid-stats">
-        <div class="stat-card income">
-          <div class="stat-label">Pemasukan</div>
-          <div class="stat-value" id="statIncome">Rp0</div>
-          <div class="stat-sub" id="statIncomeCount">0 transaksi</div>
-        </div>
-        <div class="stat-card expense">
-          <div class="stat-label">Pengeluaran</div>
-          <div class="stat-value" id="statExpense">Rp0</div>
-          <div class="stat-sub" id="statExpenseCount">0 transaksi</div>
-        </div>
-        <div class="stat-card net">
-          <div class="stat-label">Arus Kas Bersih</div>
-          <div class="stat-value" id="statNet">Rp0</div>
-          <div class="stat-sub">Pemasukan − Pengeluaran</div>
-        </div>
-        <div class="stat-card balance">
-          <div class="stat-label">Saldo Keseluruhan</div>
-          <div class="stat-value" id="statBalance">Rp0</div>
-          <div class="stat-sub" id="statBalanceSub">Dari semua akun</div>
-        </div>
-        <div class="stat-card savings">
-          <div class="stat-label">Total Tabungan</div>
-          <div class="stat-value" id="statSavings">Rp0</div>
-          <div class="stat-sub" id="statSavingsSub">0 target aktif</div>
-        </div>
-        <div class="stat-card debt">
-          <div class="stat-label">Total Utang</div>
-          <div class="stat-value" id="statDebt">Rp0</div>
-          <div class="stat-sub" id="statDebtSub">Sisa kewajiban</div>
-        </div>
+  <!-- KARTU SALDO TERSISA (PENGGANTI QUICK ACTIONS) -->
+  <div class="card remaining-balance-card">
+    <div class="remaining-balance-header">
+      <div>
+        <div class="remaining-label">TOTAL SALDO TERSISA</div>
+        <div class="remaining-sublabel">Saldo yang benar-benar bisa digunakan</div>
       </div>
+      <div class="remaining-icon">💰</div>
+    </div>
+    <div class="remaining-amount" id="statRemaining">Rp0</div>
+    <div class="remaining-breakdown">
+      <div class="breakdown-item">
+        <span class="breakdown-label">Saldo Total</span>
+        <span class="breakdown-value" id="breakdownTotal">Rp0</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="breakdown-label">− Utang</span>
+        <span class="breakdown-value negative" id="breakdownDebt">Rp0</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="breakdown-label">− Tabungan</span>
+        <span class="breakdown-value negative" id="breakdownSavings">Rp0</span>
+      </div>
+      <div class="breakdown-divider"></div>
+      <div class="breakdown-item total">
+        <span class="breakdown-label"><strong>Tersisa</strong></span>
+        <span class="breakdown-value" id="breakdownRemaining"><strong>Rp0</strong></span>
+      </div>
+    </div>
+  </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header">
-            <h3>Grafik Arus Kas</h3>
-            <select id="chartType" class="select-sm">
-              <option value="bar">Batang</option>
-              <option value="line">Garis</option>
-            </select>
-          </div>
-          <div class="chart-wrap" id="chartCashflow"></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Pengeluaran per Kategori</h3></div>
-          <div class="chart-wrap" id="chartCategory"></div>
-        </div>
-      </div>
+  <div class="grid-stats">
+    <div class="stat-card income">
+      <div class="stat-label">Pemasukan</div>
+      <div class="stat-value" id="statIncome">Rp0</div>
+      <div class="stat-sub" id="statIncomeCount">0 transaksi</div>
+    </div>
+    <div class="stat-card expense">
+      <div class="stat-label">Pengeluaran</div>
+      <div class="stat-value" id="statExpense">Rp0</div>
+      <div class="stat-sub" id="statExpenseCount">0 transaksi</div>
+    </div>
+    <div class="stat-card net">
+      <div class="stat-label">Arus Kas Bersih</div>
+      <div class="stat-value" id="statNet">Rp0</div>
+      <div class="stat-sub">Pemasukan − Pengeluaran</div>
+    </div>
+    <div class="stat-card balance">
+      <div class="stat-label">Saldo Keseluruhan</div>
+      <div class="stat-value" id="statBalance">Rp0</div>
+      <div class="stat-sub" id="statBalanceSub">Dari semua akun</div>
+    </div>
+    <div class="stat-card savings">
+      <div class="stat-label">Total Tabungan</div>
+      <div class="stat-value" id="statSavings">Rp0</div>
+      <div class="stat-sub" id="statSavingsSub">0 target aktif</div>
+    </div>
+    <div class="stat-card debt">
+      <div class="stat-label">Total Utang</div>
+      <div class="stat-value" id="statDebt">Rp0</div>
+      <div class="stat-sub" id="statDebtSub">Sisa kewajiban</div>
+    </div>
+  </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><h3>Tagihan Mendekati Jatuh Tempo</h3></div>
-          <div class="list" id="listUpcomingBills"></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Progres Target Tabungan</h3></div>
-          <div class="list" id="listSavingsProgress"></div>
-        </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <h3>Grafik Arus Kas</h3>
+        <select id="chartType" class="select-sm">
+          <option value="bar">Batang</option>
+          <option value="line">Garis</option>
+        </select>
       </div>
+      <div class="chart-wrap" id="chartCashflow"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Pengeluaran per Kategori</h3></div>
+      <div class="chart-wrap" id="chartCategory"></div>
+    </div>
+  </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h3>Transaksi Terbaru</h3>
-          <a href="#transaksi" class="link">Lihat Semua →</a>
-        </div>
-        <div class="list" id="listRecentTx"></div>
-      </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><h3>Tagihan Mendekati Jatuh Tempo</h3></div>
+      <div class="list" id="listUpcomingBills"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Progres Target Tabungan</h3></div>
+      <div class="list" id="listSavingsProgress"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Transaksi Terbaru</h3>
+      <a href="#transaksi" class="link">Lihat Semua →</a>
+    </div>
+    <div class="list" id="listRecentTx"></div>
+  </div>
     </section>
 
     <!-- ===================== PAGE 2: TRANSAKSI ===================== -->
