@@ -502,6 +502,24 @@ Pages.dashboard = {
     const totalDebt = Calc.totalDebtRemaining();
     document.getElementById('statDebt').textContent = U.fmtMoney(totalDebt);
     document.getElementById('statDebtSub').textContent = State.debts.filter(d=>d.status!=='lunas').length + ' utang aktif';
+     // Hitung dan tampilkan saldo tersisa
+const totalBalance = Calc.totalBalance();
+const totalSavings = Calc.totalSavings();
+const remaining = totalBalance - totalDebt - totalSavings;
+
+document.getElementById('statRemaining').textContent = U.fmtMoney(remaining);
+document.getElementById('breakdownTotal').textContent = U.fmtMoney(totalBalance);
+document.getElementById('breakdownDebt').textContent = U.fmtMoney(totalDebt);
+document.getElementById('breakdownSavings').textContent = U.fmtMoney(totalSavings);
+document.getElementById('breakdownRemaining').innerHTML = '<strong>' + U.fmtMoney(remaining) + '</strong>';
+
+// Ubah warna jika saldo negatif
+const remainingEl = document.getElementById('statRemaining');
+if (remaining < 0) {
+  remainingEl.style.color = '#fecaca';
+} else {
+  remainingEl.style.color = 'white';
+}
 
     // Chart arus kas
     this.renderCashflowChart(txs);
@@ -1745,17 +1763,6 @@ btnChoose.addEventListener('drop', (e) => {
     Pages.dashboard.refresh();
   };
   document.getElementById('chartType').onchange = () => Pages.dashboard.renderCashflowChart(Calc.filterByPeriod(State.transactions));
-
-  // Quick actions
-  document.querySelectorAll('.qa-btn').forEach(b => {
-    b.onclick = () => {
-      const a = b.dataset.action;
-      if (a === 'add-income') Pages.transaksi.openForm({ type:'income', date:U.todayISO() });
-      else if (a === 'add-expense') Pages.transaksi.openForm({ type:'expense', date:U.todayISO() });
-      else if (a === 'add-debt') Pages.debts.openForm();
-      else if (a === 'add-savings') Pages.savings.openForm();
-    };
-  });
 
   // Transaksi
   document.getElementById('btnAddTx').onclick = () => Pages.transaksi.openForm();
