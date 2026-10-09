@@ -231,51 +231,56 @@ textarea.input{min-height:80px;resize:vertical}
   .period-selector button{padding:6px 10px;font-size:.78rem}
   .stat-value{font-size:1.2rem}
 }
-/* ============ REMAINING BALANCE CARD ============ */
+/* ============ KARTU SALDO TERSISA ============ */
 .remaining-balance-card {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  padding: 24px;
+  padding: 22px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  border: none;
 }
 
 .remaining-balance-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
 }
 
 .remaining-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  opacity: 0.9;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  opacity: 0.95;
+  text-transform: uppercase;
 }
 
 .remaining-sublabel {
   font-size: 0.75rem;
-  opacity: 0.8;
-  margin-top: 2px;
+  opacity: 0.85;
+  margin-top: 3px;
 }
 
 .remaining-icon {
   font-size: 2rem;
   opacity: 0.9;
+  line-height: 1;
 }
 
 .remaining-amount {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 16px;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 14px;
   word-break: break-word;
+  line-height: 1.2;
 }
 
 .remaining-breakdown {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  padding: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 12px 14px;
   backdrop-filter: blur(10px);
 }
 
@@ -283,12 +288,12 @@ textarea.input{min-height:80px;resize:vertical}
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
-  font-size: 0.85rem;
+  padding: 5px 0;
+  font-size: 0.88rem;
 }
 
 .breakdown-label {
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 .breakdown-value {
@@ -301,30 +306,32 @@ textarea.input{min-height:80px;resize:vertical}
 
 .breakdown-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.3);
-  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.35);
+  margin: 6px 0;
 }
 
 .breakdown-item.total {
   font-size: 0.95rem;
-  padding-top: 10px;
+  padding-top: 8px;
 }
 
-/* Dark mode adjustment */
+/* Dark mode */
 [data-theme="dark"] .remaining-balance-card {
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
 }
 
-/* Responsive */
+/* Mobile */
 @media (max-width: 480px) {
   .remaining-amount {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
   }
   .remaining-balance-card {
     padding: 18px;
   }
+  .breakdown-item {
+    font-size: 0.82rem;
+  }
 }
-
 /* ============ PRINT ============ */
 @media print{
   .sidebar,.topbar,.bottom-nav,.quick-actions,.period-bar,.btn,.modal-backdrop,.toast-container{display:none!important}
