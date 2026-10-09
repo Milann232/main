@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
+<meta name="theme-color" content="#10b981" />
+<title>DompetKu — Keuangan Pribadi</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2310b981'/%3E%3Ctext x='50' y='65' font-size='55' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3ED%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- SIDEBAR DESKTOP -->
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-logo">D</div>
+    <div class="brand-text">
+      <h1>DompetKu</h1>
+      <small>Keuangan Pribadi</small>
+    </div>
+  </div>
+  <nav class="nav-menu">
+    <a href="#dashboard" data-page="dashboard" class="nav-item active">
+      <span class="icon">🏠</span><span>Dashboard</span>
+    </a>
+    <a href="#transaksi" data-page="transaksi" class="nav-item">
+      <span class="icon">💸</span><span>Transaksi</span>
+    </a>
+    <a href="#tabungan" data-page="tabungan" class="nav-item">
+      <span class="icon">🎯</span><span>Tabungan</span>
+    </a>
+    <a href="#utang" data-page="utang" class="nav-item">
+      <span class="icon">💳</span><span>Utang</span>
+    </a>
+    <a href="#anggaran" data-page="anggaran" class="nav-item">
+      <span class="icon">📊</span><span>Anggaran</span>
+    </a>
+    <a href="#kalender" data-page="kalender" class="nav-item">
+      <span class="icon">📅</span><span>Kalender</span>
+    </a>
+    <a href="#laporan" data-page="laporan" class="nav-item">
+      <span class="icon">📈</span><span>Laporan</span>
+    </a>
+    <a href="#pengaturan" data-page="pengaturan" class="nav-item">
+      <span class="icon">⚙️</span><span>Pengaturan</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <small>Data tersimpan lokal di perangkat Anda</small>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    <h2 class="page-title" id="pageTitle">Dashboard</h2>
+    <div class="topbar-actions">
+      <button class="btn-icon" id="themeToggle" title="Ganti tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ===================== PAGE 1: DASHBOARD ===================== -->
+    <section class="page" id="page-dashboard">
+      <div class="period-bar">
+        <div class="period-selector" id="periodSelector">
+          <button data-period="today">Hari Ini</button>
+          <button data-period="week">Minggu Ini</button>
+          <button data-period="month" class="active">Bulan Ini</button>
+          <button data-period="year">Tahun Ini</button>
+          <button data-period="custom">Rentang</button>
+        </div>
+        <div class="custom-range" id="customRange" style="display:none">
+          <input type="date" id="dateFrom" />
+          <span>s/d</span>
+          <input type="date" id="dateTo" />
+          <button class="btn btn-sm" id="applyRange">Terapkan</button>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="qa-btn qa-income" data-action="add-income">+ Pemasukan</button>
+        <button class="qa-btn qa-expense" data-action="add-expense">+ Pengeluaran</button>
+        <button class="qa-btn qa-debt" data-action="add-debt">+ Utang</button>
+        <button class="qa-btn qa-savings" data-action="add-savings">+ Tabungan</button>
+      </div>
+
+      <div class="grid-stats">
+        <div class="stat-card income">
+          <div class="stat-label">Pemasukan</div>
+          <div class="stat-value" id="statIncome">Rp0</div>
+          <div class="stat-sub" id="statIncomeCount">0 transaksi</div>
+        </div>
+        <div class="stat-card expense">
+          <div class="stat-label">Pengeluaran</div>
+          <div class="stat-value" id="statExpense">Rp0</div>
+          <div class="stat-sub" id="statExpenseCount">0 transaksi</div>
+        </div>
+        <div class="stat-card net">
+          <div class="stat-label">Arus Kas Bersih</div>
+          <div class="stat-value" id="statNet">Rp0</div>
+          <div class="stat-sub">Pemasukan − Pengeluaran</div>
+        </div>
+        <div class="stat-card balance">
+          <div class="stat-label">Saldo Keseluruhan</div>
+          <div class="stat-value" id="statBalance">Rp0</div>
+          <div class="stat-sub" id="statBalanceSub">Dari semua akun</div>
+        </div>
+        <div class="stat-card savings">
+          <div class="stat-label">Total Tabungan</div>
+          <div class="stat-value" id="statSavings">Rp0</div>
+          <div class="stat-sub" id="statSavingsSub">0 target aktif</div>
+        </div>
+        <div class="stat-card debt">
+          <div class="stat-label">Total Utang</div>
+          <div class="stat-value" id="statDebt">Rp0</div>
+          <div class="stat-sub" id="statDebtSub">Sisa kewajiban</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3>Grafik Arus Kas</h3>
+            <select id="chartType" class="select-sm">
+              <option value="bar">Batang</option>
+              <option value="line">Garis</option>
+            </select>
+          </div>
+          <div class="chart-wrap" id="chartCashflow"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Pengeluaran per Kategori</h3></div>
+          <div class="chart-wrap" id="chartCategory"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><h3>Tagihan Mendekati Jatuh Tempo</h3></div>
+          <div class="list" id="listUpcomingBills"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Progres Target Tabungan</h3></div>
+          <div class="list" id="listSavingsProgress"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Transaksi Terbaru</h3>
+          <a href="#transaksi" class="link">Lihat Semua →</a>
+        </div>
+        <div class="list" id="listRecentTx"></div>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 2: TRANSAKSI ===================== -->
+    <section class="page hidden" id="page-transaksi">
+      <div class="card">
+        <div class="card-header">
+          <h3>Daftar Transaksi</h3>
+          <button class="btn btn-primary" id="btnAddTx">+ Tambah Transaksi</button>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="txSearch" placeholder="Cari transaksi..." class="input" />
+          <select id="txFilterType" class="select">
+            <option value="">Semua Jenis</option>
+            <option value="income">Pemasukan</option>
+            <option value="expense">Pengeluaran</option>
+            <option value="transfer">Transfer</option>
+          </select>
+          <select id="txFilterCategory" class="select"></select>
+          <select id="txFilterAccount" class="select"></select>
+          <input type="date" id="txFilterFrom" class="input" />
+          <input type="date" id="txFilterTo" class="input" />
+          <select id="txSort" class="select">
+            <option value="date-desc">Tanggal (Terbaru)</option>
+            <option value="date-asc">Tanggal (Terlama)</option>
+            <option value="amount-desc">Nominal (Terbesar)</option>
+            <option value="amount-asc">Nominal (Terkecil)</option>
+          </select>
+          <button class="btn btn-sm" id="btnClearFilter">Reset</button>
+        </div>
+        <div class="list" id="listTransactions"></div>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 3: TABUNGAN ===================== -->
+    <section class="page hidden" id="page-tabungan">
+      <div class="card">
+        <div class="card-header">
+          <h3>Target Tabungan</h3>
+          <button class="btn btn-primary" id="btnAddSavings">+ Target Baru</button>
+        </div>
+        <div class="savings-summary">
+          <div><strong>Total Terkumpul:</strong> <span id="savingsTotal">Rp0</span></div>
+          <div><strong>Total Target:</strong> <span id="savingsTarget">Rp0</span></div>
+          <div><strong>Sisa Dibutuhkan:</strong> <span id="savingsRemaining">Rp0</span></div>
+        </div>
+        <div class="list" id="listSavings"></div>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 4: UTANG ===================== -->
+    <section class="page hidden" id="page-utang">
+      <div class="card">
+        <div class="card-header">
+          <h3>Utang & Paylater</h3>
+          <button class="btn btn-primary" id="btnAddDebt">+ Tambah Utang</button>
+        </div>
+        <div class="grid-stats grid-4">
+          <div class="stat-card"><div class="stat-label">Total Sisa Utang</div><div class="stat-value" id="debtTotal">Rp0</div></div>
+          <div class="stat-card"><div class="stat-label">Cicilan Bulan Ini</div><div class="stat-value" id="debtMonthly">Rp0</div></div>
+          <div class="stat-card warn"><div class="stat-label">Jatuh Tempo ≤7 Hari</div><div class="stat-value" id="debtDueSoon">0</div></div>
+          <div class="stat-card danger"><div class="stat-label">Terlambat</div><div class="stat-value" id="debtOverdue">0</div></div>
+        </div>
+        <div class="list" id="listDebts"></div>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 5: ANGGARAN ===================== -->
+    <section class="page hidden" id="page-anggaran">
+      <div class="card">
+        <div class="card-header">
+          <h3>Anggaran Bulanan</h3>
+          <div>
+            <input type="month" id="budgetMonth" class="input" />
+            <button class="btn btn-primary" id="btnEditBudget">Atur Anggaran</button>
+          </div>
+        </div>
+        <div class="list" id="listBudget"></div>
+        <div class="card-header" style="margin-top:20px"><h3>Riwayat Anggaran</h3></div>
+        <div class="chart-wrap" id="chartBudget"></div>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 6: KALENDER ===================== -->
+    <section class="page hidden" id="page-kalender">
+      <div class="card">
+        <div class="card-header">
+          <h3 id="calendarTitle">Kalender</h3>
+          <div>
+            <button class="btn btn-sm" id="calPrev">‹</button>
+            <button class="btn btn-sm" id="calToday">Hari Ini</button>
+            <button class="btn btn-sm" id="calNext">›</button>
+            <button class="btn btn-primary" id="btnAddSchedule">+ Jadwal</button>
+          </div>
+        </div>
+        <div class="calendar" id="calendarGrid"></div>
+        <div class="card-header" style="margin-top:20px"><h3>Agenda Bulan Ini</h3></div>
+        <div class="list" id="listAgenda"></div>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 7: LAPORAN ===================== -->
+    <section class="page hidden" id="page-laporan">
+      <div class="card">
+        <div class="card-header">
+          <h3>Laporan Keuangan</h3>
+          <div>
+            <select id="reportPeriod" class="select">
+              <option value="month">Bulan Ini</option>
+              <option value="last-month">Bulan Lalu</option>
+              <option value="year">Tahun Ini</option>
+              <option value="last-year">Tahun Lalu</option>
+              <option value="custom">Rentang Tanggal</option>
+            </select>
+            <input type="date" id="reportFrom" class="input" style="display:none" />
+            <input type="date" id="reportTo" class="input" style="display:none" />
+            <button class="btn btn-sm" id="btnPrintReport">🖨️ Cetak PDF</button>
+          </div>
+        </div>
+        <div class="grid-stats grid-4">
+          <div class="stat-card"><div class="stat-label">Total Pemasukan</div><div class="stat-value" id="rptIncome">Rp0</div></div>
+          <div class="stat-card"><div class="stat-label">Total Pengeluaran</div><div class="stat-value" id="rptExpense">Rp0</div></div>
+          <div class="stat-card"><div class="stat-label">Arus Kas Bersih</div><div class="stat-value" id="rptNet">Rp0</div></div>
+          <div class="stat-card"><div class="stat-label">Jumlah Transaksi</div><div class="stat-value" id="rptCount">0</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><div class="card-header"><h3>Pengeluaran per Kategori</h3></div><div id="rptCategory"></div></div>
+          <div class="card"><div class="card-header"><h3>Rekap per Akun</h3></div><div id="rptAccount"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Tren Bulanan</h3></div>
+          <div class="chart-wrap" id="chartTrend"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 8: PENGATURAN ===================== -->
+    <section class="page hidden" id="page-pengaturan">
+      <div class="card">
+        <div class="card-header"><h3>Profil & Preferensi</h3></div>
+        <div class="form-grid">
+          <label>Nama Pengguna
+            <input type="text" id="setName" class="input" placeholder="Opsional" />
+          </label>
+          <label>Mata Uang
+            <select id="setCurrency" class="select">
+              <option value="IDR">IDR — Rupiah</option>
+              <option value="USD">USD — Dolar</option>
+            </select>
+          </label>
+          <label>Tanggal Awal Periode Anggaran
+            <input type="number" id="setBudgetStart" class="input" min="1" max="28" value="1" />
+          </label>
+          <label>Tema
+            <select id="setTheme" class="select">
+              <option value="light">Terang</option>
+              <option value="dark">Gelap</option>
+              <option value="auto">Otomatis (Sistem)</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn btn-primary" id="btnSaveSettings">Simpan Pengaturan</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Kelola Kategori</h3><button class="btn btn-sm" id="btnAddCategory">+ Kategori</button></div>
+        <div class="list" id="listCategories"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Kelola Akun</h3><button class="btn btn-sm" id="btnAddAccount">+ Akun</button></div>
+        <div class="list" id="listAccounts"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Backup & Ekspor Data</h3></div>
+        <p class="muted">Ekspor data untuk cadangan atau dianalisis di aplikasi lain. File akan diunduh melalui browser — Anda dapat memilih lokasi penyimpanan.</p>
+        <div class="btn-group">
+          <button class="btn" data-export="all-json">📦 Backup Lengkap (JSON)</button>
+          <button class="btn" data-export="tx-csv">📄 Transaksi (CSV)</button>
+          <button class="btn" data-export="tx-xlsx">📊 Transaksi (Excel)</button>
+          <button class="btn" data-export="savings-json">🎯 Tabungan (JSON)</button>
+          <button class="btn" data-export="debts-json">💳 Utang (JSON)</button>
+          <button class="btn" data-export="report-pdf">🖨️ Laporan (PDF)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Impor & Pemulihan</h3></div>
+        <p class="muted">Impor file backup JSON. Sebelum dipulihkan, Anda akan melihat ringkasan isi dan diminta konfirmasi. Pilih mode: <strong>ganti</strong> (timpa semua data) atau <strong>gabungkan</strong> (tanpa duplikasi ID).</p>
+        <input type="file" id="importFile" accept=".json" class="input" />
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btnImportReplace">Pulihkan (Ganti Data)</button>
+          <button class="btn" id="btnImportMerge">Pulihkan (Gabungkan)</button>
+        </div>
+      </div>
+
+      <div class="card danger-zone">
+        <div class="card-header"><h3>Zona Bahaya</h3></div>
+        <p class="muted">Tindakan ini tidak dapat dibatalkan. Pastikan Anda sudah melakukan backup sebelum melanjutkan.</p>
+        <button class="btn btn-danger" id="btnClearAll">🗑️ Hapus Semua Data</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Tentang</h3></div>
+        <p><strong>DompetKu</strong> v1.0 — Aplikasi keuangan pribadi yang berjalan sepenuhnya di browser Anda.</p>
+        <p class="muted">⚠️ Data disimpan di IndexedDB browser. Data dapat hilang jika Anda menghapus data browser, menginstal ulang browser, atau perangkat rusak. <strong>Rutin lakukan backup JSON.</strong></p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- BOTTOM NAV MOBILE -->
+<nav class="bottom-nav" id="bottomNav">
+  <a href="#dashboard" data-page="dashboard" class="bn-item active"><span>🏠</span><small>Home</small></a>
+  <a href="#transaksi" data-page="transaksi" class="bn-item"><span>💸</span><small>Transaksi</small></a>
+  <a href="#tabungan" data-page="tabungan" class="bn-item"><span>🎯</span><small>Tabungan</small></a>
+  <a href="#utang" data-page="utang" class="bn-item"><span>💳</span><small>Utang</small></a>
+  <a href="#pengaturan" data-page="pengaturan" class="bn-item"><span>⚙️</span><small>Lainnya</small></a>
+</nav>
+
+<!-- MODAL CONTAINER -->
+<div class="modal-backdrop hidden" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Modal</h3>
+      <button class="btn-icon" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
