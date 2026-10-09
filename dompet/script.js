@@ -502,34 +502,27 @@ Pages.dashboard = {
     const totalDebt = Calc.totalDebtRemaining();
     document.getElementById('statDebt').textContent = U.fmtMoney(totalDebt);
     document.getElementById('statDebtSub').textContent = State.debts.filter(d=>d.status!=='lunas').length + ' utang aktif';
-     // Hitung dan tampilkan saldo tersisa
-const totalBalance = Calc.totalBalance();
-const totalSavings = Calc.totalSavings();
-const remaining = totalBalance - totalDebt - totalSavings;
 
-document.getElementById('statRemaining').textContent = U.fmtMoney(remaining);
-document.getElementById('breakdownTotal').textContent = U.fmtMoney(totalBalance);
-document.getElementById('breakdownDebt').textContent = U.fmtMoney(totalDebt);
-document.getElementById('breakdownSavings').textContent = U.fmtMoney(totalSavings);
-document.getElementById('breakdownRemaining').innerHTML = '<strong>' + U.fmtMoney(remaining) + '</strong>';
+    // === KARTU SALDO TERSISA ===
+    const remaining = totalBal - totalDebt - totalSav;
+    const remainingEl = document.getElementById('statRemaining');
+    if (remainingEl) {
+      remainingEl.textContent = U.fmtMoney(remaining);
+      remainingEl.style.color = remaining < 0 ? '#fecaca' : 'white';
+    }
+    const bt = document.getElementById('breakdownTotal');
+    const bd = document.getElementById('breakdownDebt');
+    const bs = document.getElementById('breakdownSavings');
+    const br = document.getElementById('breakdownRemaining');
+    if (bt) bt.textContent = U.fmtMoney(totalBal);
+    if (bd) bd.textContent = U.fmtMoney(totalDebt);
+    if (bs) bs.textContent = U.fmtMoney(totalSav);
+    if (br) br.innerHTML = '<strong>' + U.fmtMoney(remaining) + '</strong>';
 
-// Ubah warna jika saldo negatif
-const remainingEl = document.getElementById('statRemaining');
-if (remaining < 0) {
-  remainingEl.style.color = '#fecaca';
-} else {
-  remainingEl.style.color = 'white';
-}
-
-    // Chart arus kas
     this.renderCashflowChart(txs);
-    // Chart kategori
     this.renderCategoryChart(txs);
-    // Upcoming bills
     this.renderUpcomingBills();
-    // Savings progress
     this.renderSavingsProgress();
-    // Recent tx
     this.renderRecentTx();
   },
   renderCashflowChart(txs) {
